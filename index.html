@@ -65,7 +65,8 @@ footer{padding:16px;text-align:center;color:var(--muted);font-size:13px;}
     <button id="closeBot" title="Fermer">✖</button>
   </div>
   <div id="botBody" aria-live="polite">
-    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs Middleman. Tapez le code admin pour accéder aux fonctionnalités.</div>
+    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs Middleman. Tapez le code admin pour accéder au panneau.</div>
+    <div id="adminContent" style="display:none;"></div>
   </div>
   <div id="botFooter">
     <input id="botInput" type="text" placeholder="Écris un message..." autocomplete="off">
@@ -90,20 +91,20 @@ const botBody = document.getElementById('botBody');
 const botInput = document.getElementById('botInput');
 const sendBtn = document.getElementById('sendBtn');
 const adminCodeInput = document.getElementById('adminCodeInput');
+const adminContent = document.getElementById('adminContent');
 
 const ADMIN_CODE = '233233';
 let adminActive = false;
-let currentUserId = 'user-' + crypto.randomUUID().slice(0,8);
 
 function appendMsg(text, from='bot'){
   const div = document.createElement('div');
   div.className = 'msg ' + (from==='bot'?'bot':'user');
   div.innerHTML = text;
-  botBody.appendChild(div);
+  botBody.insertBefore(div, adminContent);
   botBody.scrollTop = botBody.scrollHeight;
 }
 
-// Open/close bot
+// Ouvrir / fermer le bot
 botIcon.addEventListener('click', ()=>{
   const visible = botWindow.style.display === 'flex';
   botWindow.style.display = visible ? 'none':'flex';
@@ -114,21 +115,21 @@ closeBot.addEventListener('click', ()=>{
   botWindow.setAttribute('aria-hidden','true');
 });
 
-// Handle admin code
-adminCodeInput.addEventListener('keypress',(e)=>{
-  if(e.key==='Enter'){
-    if(adminCodeInput.value===ADMIN_CODE){
-      adminActive=true;
+// Entrée du code admin
+adminCodeInput.addEventListener('keypress', async (e)=>{
+  if(e.key === 'Enter'){
+    if(adminCodeInput.value === ADMIN_CODE){
+      adminActive = true;
       appendMsg('Accès admin validé ✅','bot');
-      showAdminPanel();
-      adminCodeInput.value='';
-    }else{
+      await showAdminPanel();
+      adminCodeInput.value = '';
+    } else {
       appendMsg('Code invalide ❌','bot');
     }
   }
 });
 
-// Send messages
+// Envoyer message
 sendBtn.addEventListener('click', submitMessage);
 botInput.addEventListener('keypress',(e)=>{ if(e.key==='Enter') submitMessage(); });
 
@@ -137,95 +138,30 @@ async function submitMessage(){
   if(!text) return;
   appendMsg(text,'user');
   botInput.value='';
-  await processUserMessage(text);
+  appendMsg('Je n’ai pas compris 🤖. Tape le code admin pour accéder au panneau.','bot');
 }
 
-async function processUserMessage(text){
-  const lower = text.toLowerCase().trim();
-  if(lower.includes('bonjour') || lower.includes('salut')){
-    appendMsg('Salut 👋 — dis-moi ton besoin : emploi, formation, abonnement','bot');
-    return;
-  }
-  appendMsg('Je n\'ai pas compris. Tape le code admin pour accéder au panneau.','bot');
-}
-
-// Admin panel
+// Afficher le panneau admin
 async function showAdminPanel(){
-  botBody.innerHTML='';
-  const wrapper = document.createElement('div');
-  wrapper.className='admin-panel';
-  wrapper.innerHTML=`
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-      <strong>⚙️ Panneau Admin</strong>
-    </div>
-    <div id="adminContent" style="min-height:80px;">Chargement utilisateurs...</div>
-  `;
-  botBody.appendChild(wrapper);
-
+  adminContent.style.display = 'block';
+  adminContent.innerHTML = 'Chargement des utilisateurs...';
   try{
-    const {data,error}=await supabase.from('users').select('id, phone, created_at').order('created_at',{ascending:false});
-    const container=document.getElementById('adminContent');
-    if(error){container.innerHTML='Erreur chargement utilisateurs';return;}
-    if(!data||data.length===0){container.innerHTML = 'Aucun utilisateur trouvé.'; return; }
+    const { data, error } = await supabase.from('users').select('id, phone, created_at').order('created_at',{ascending:false});
+    if(error){ adminContent.innerHTML = 'Erreur chargement utilisateurs.'; return; }
+    if(!data || !data.length){ adminContent.innerHTML = 'Aucun utilisateur trouvé.'; return; }
 
-    // Création du tableau
-    const table = document.createElement('table');
-    const thead = document.createElement('thead');
-    thead.innerHTML = `
-      <tr>
-        <th>ID</th>
-        <th>Téléphone</th>
-        <th>Créé le</th>
-        <th>Actions</th>
-      </tr>
-    `;
-    table.appendChild(thead);
-
-    const tbody = document.createElement('tbody');
-    data.forEach(user => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${user.id}</td>
-        <td>${user.phone || '-'}</td>
-        <td>${new Date(user.created_at).toLocaleString()}</td>
-        <td>
-          <button class="btn unblock" data-id="${user.id}">Voir</button>
-          <button class="btn block" data-id="${user.id}">Supprimer</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
+    let html = `<table><thead><tr><th>ID</th><th>Téléphone</th><th>Créé le</th></tr></thead><tbody>`;
+    data.forEach(u=>{
+      html += `<tr><td>${u.id}</td><td>${u.phone||'-'}</td><td>${new Date(u.created_at).toLocaleString()}</td></tr>`;
     });
-    table.appendChild(tbody);
-    container.innerHTML = '';
-    container.appendChild(table);
-
-    // Actions boutons
-    table.querySelectorAll('.btn.unblock').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const id = btn.dataset.id;
-        appendMsg(`💻 Informations utilisateur ID: ${id} (affiche détails ici)`, 'bot');
-      });
-    });
-
-    table.querySelectorAll('.btn.block').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        const id = btn.dataset.id;
-        if(confirm('Supprimer cet utilisateur ?')){
-          const {error} = await supabase.from('users').delete().eq('id', id);
-          if(error) appendMsg('Erreur suppression: '+error.message,'bot');
-          else{
-            appendMsg('Utilisateur supprimé ✅','bot');
-            showAdminPanel(); // recharge le tableau
-          }
-        }
-      });
-    });
-
+    html += '</tbody></table>';
+    adminContent.innerHTML = html;
   }catch(err){
+    adminContent.innerHTML = 'Erreur serveur ⚠️';
     console.error(err);
-    appendMsg('Erreur serveur ⚠️','bot');
   }
 }
 </script>
-</script>
+
+</body>
 </html>
