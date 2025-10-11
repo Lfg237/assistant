@@ -1,45 +1,52 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>LesFacilitateurs — Bot & Admin (débogage)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LesFacilitateurs — Bot & Admin</title>
 <style>
-:root{--main:#2563eb;--accent:#10b981;--bg:#f3f4f6;--card:#fff;--muted:#6b7280}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#111827}
-header{background:linear-gradient(90deg,var(--main),#1d4ed8);color:#fff;padding:14px;text-align:center}
-.container{max-width:1100px;margin:18px auto;padding:0 12px}
-.card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:12px}
-#botIcon{position:fixed;right:20px;bottom:20px;width:64px;height:64px;border-radius:999px;background:linear-gradient(135deg,#ffb703,#fb5607);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.18);cursor:pointer;z-index:2000}
-#botIcon img{width:68%;height:68%;border-radius:50%}
-#botWindow{position:fixed;right:20px;bottom:96px;width:380px;max-height:80vh;background:#fff;border-radius:12px;box-shadow:0 20px 40px rgba(2,6,23,0.18);display:none;flex-direction:column;z-index:2000;overflow:hidden}
-#botHead{background:linear-gradient(90deg,var(--main),#3b82f6);color:#fff;padding:10px 12px;display:flex;align-items:center;gap:8px}
-#botHead .title{font-weight:600;font-size:14px;flex:1}
-#botHead input{padding:6px 8px;border-radius:6px;border:none;background:rgba(255,255,255,0.12);color:white;width:110px}
-#botHead button{background:transparent;border:none;color:white;font-size:18px;cursor:pointer}
-#botBody{padding:10px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px}
-.msg{margin:6px 0;padding:10px;border-radius:10px;max-width:85%;word-break:break-word}
-.msg.bot{background:#eef2ff;align-self:flex-start;color:#0b1220}
-.msg.user{background:#e6ffed;align-self:flex-end;color:#0b1220}
-#botFooter{display:flex;padding:10px;border-top:1px solid #eef2ff;gap:8px}
-#botFooter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef}
-#botFooter button{background:var(--main);color:white;border:none;border-radius:8px;padding:10px 12px;cursor:pointer}
-.admin-panel{background:#fff;border-radius:8px;padding:8px;border:1px solid #eef2ff}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left}
-th{background:#f8fafc;color:#111827;font-weight:600}
-.btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer}
-.btn.block{background:#ef4444;color:white}
-.btn.unblock{background:#10b981;color:white}
-.small{font-size:12px;color:var(--muted)}
-.status{font-size:13px;color:#0b1220;padding:6px 8px;border-radius:6px;background:#f7fdf7;border:1px solid #e6f7ea;margin-bottom:6px}
-.error{color:#ef4444;background:#fff0f0;padding:6px;border-radius:6px;border:1px solid #f7d7d7}
-@media(max-width:480px){#botWindow{right:10px;left:10px;width:auto;bottom:80px}}
+:root{
+  --main:#2563eb; --accent:#10b981; --bg:#f3f4f6; --card:#fff; --muted:#6b7280;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:#111827;}
+header{background:linear-gradient(90deg,var(--main),#1d4ed8);color:white;padding:14px;text-align:center;}
+header h1{margin:0;font-size:18px;}
+.container{max-width:1100px;margin:18px auto;padding:0 12px;}
+.card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:12px;}
+#botIcon{position:fixed;right:20px;bottom:20px;width:64px;height:64px;border-radius:999px;background:linear-gradient(135deg,#ffb703,#fb5607);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.18);cursor:pointer;z-index:2000;transition:transform .14s ease;}
+#botIcon:hover{transform: translateY(-4px);}
+#botIcon img{width:68%;height:68%;border-radius:50%;}
+#botWindow{position:fixed;right:20px;bottom:96px;width:400px;max-height:80vh;background:white;border-radius:12px;box-shadow:0 20px 40px rgba(2,6,23,0.18);display:none;flex-direction:column;z-index:2000;overflow:hidden;}
+#botHead{background:linear-gradient(90deg,var(--main),#3b82f6);color:white;padding:10px 12px;display:flex;align-items:center;gap:8px;}
+#botHead .title{font-weight:600;font-size:14px;flex:1;}
+#botHead input{padding:6px 8px;border-radius:6px;border:none;background:rgba(255,255,255,0.12);color:white;width:110px;}
+#botHead button{background:transparent;border:none;color:white;font-size:18px;cursor:pointer;}
+#botBody{padding:10px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;}
+.msg{margin:6px 0;padding:10px;border-radius:10px;max-width:85%;word-break:break-word;}
+.msg.bot{background:#eef2ff;align-self:flex-start;color:#0b1220;}
+.msg.user{background:#e6ffed;align-self:flex-end;color:#0b1220;}
+#botFooter{display:flex;padding:10px;border-top:1px solid #eef2ff;gap:8px;}
+#botFooter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef;}
+#botFooter button{background:var(--main);color:white;border:none;border-radius:8px;padding:10px 12px;cursor:pointer;}
+.admin-panel{background:#fff;border-radius:8px;padding:8px;border:1px solid #eef2ff;margin-bottom:12px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;}
+th{background:#f8fafc;color:#111827;font-weight:600;}
+.btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer;}
+.btn.block{background:#ef4444;color:white;}
+.btn.unblock{background:#10b981;color:white;}
+.status{font-size:13px;color:#0b1220;padding:6px 8px;border-radius:6px;background:#f7fdf7;border:1px solid #e6f7ea;margin-bottom:6px;}
+.small{font-size:12px;color:var(--muted);}
+@media(max-width:480px){#botWindow{right:10px;left:10px;width:auto;bottom:80px;}}
 </style>
 </head>
 <body>
-<header><h1>LesFacilitateurs — Plateforme</h1></header>
+
+<header>
+  <h1>LesFacilitateurs — Plateforme</h1>
+</header>
+
 <main class="container">
   <div class="card">
     <h3>Tableau de bord</h3>
@@ -62,7 +69,7 @@ th{background:#f8fafc;color:#111827;font-weight:600}
   </div>
 
   <div id="botBody" aria-live="polite">
-    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs Middleman. Tape ton besoin (ex: "emploi") ou entre le code admin pour ouvrir le panneau.</div>
+    <div class="msg bot">Bonjour 👋 — tape ton besoin ou le code admin pour ouvrir le panneau.</div>
     <!-- adminContent sera rendu ici -->
   </div>
 
@@ -77,17 +84,12 @@ th{background:#f8fafc;color:#111827;font-weight:600}
 </footer>
 
 <script type="module">
-/* -----------------------
-   CONFIG SUPABASE (clé publique fournie)
-   ----------------------- */
+/* ---------- CONFIG ---------- */
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const SUPABASE_URL = 'https://ycotvgvevyfyqflicmtw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-
-/* ---------- IMPORT SUPABASE ESM ---------- */
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ---------- DOM ---------- */
 const botIcon = document.getElementById('botIcon');
 const botWindow = document.getElementById('botWindow');
 const closeBot = document.getElementById('closeBot');
@@ -99,7 +101,6 @@ const adminSubmitBtn = document.getElementById('adminSubmitBtn');
 
 const ADMIN_CODE = '233233';
 let adminActive = false;
-let currentUserId = 'user-' + crypto.randomUUID().slice(0,8);
 
 /* ---------- helpers ---------- */
 function appendMsg(text, from='bot'){
@@ -109,164 +110,131 @@ function appendMsg(text, from='bot'){
   botBody.appendChild(div);
   botBody.scrollTop = botBody.scrollHeight;
 }
-function appendStatus(text){ // small green status inside admin area (if exists)
-  const s = document.createElement('div'); s.className='status'; s.textContent = text;
-  const admin = document.querySelector('.admin-panel');
-  if(admin) admin.prepend(s);
-}
 
-/* ---------- open / close bot ---------- */
-botIcon.addEventListener('click', () => {
+/* ---------- bot open/close ---------- */
+botIcon.addEventListener('click', ()=> {
   const visible = botWindow.style.display === 'flex';
   botWindow.style.display = visible ? 'none' : 'flex';
-  botWindow.setAttribute('aria-hidden', visible ? 'true' : 'false');
-  if(!visible) setTimeout(()=>adminCodeInput.focus(),200);
 });
-closeBot.addEventListener('click', ()=> {
-  botWindow.style.display = 'none';
-  botWindow.setAttribute('aria-hidden','true');
-});
+closeBot.addEventListener('click', ()=> botWindow.style.display='none');
 
-/* ---------- admin submit (enter + button) ---------- */
+/* ---------- admin submit ---------- */
 async function handleAdminSubmit(){
   const code = adminCodeInput.value.trim();
-  if(!code) return;
   if(code === ADMIN_CODE){
     adminActive = true;
-    adminCodeInput.value = '';
-    appendMsg('✅ Accès admin validé — ouverture du panneau admin.','bot');
+    adminCodeInput.value='';
+    appendMsg('✅ Accès admin validé.');
     await renderAdminPanel();
   } else {
-    appendMsg('❌ Code admin invalide.','bot');
+    appendMsg('❌ Code admin invalide.');
   }
 }
 adminSubmitBtn.addEventListener('click', handleAdminSubmit);
-adminCodeInput.addEventListener('keypress', async (e) => { if(e.key === 'Enter') await handleAdminSubmit(); });
+adminCodeInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') handleAdminSubmit(); });
 
 /* ---------- messages ---------- */
 sendBtn.addEventListener('click', submitMessage);
-botInput.addEventListener('keypress', (e)=> { if(e.key === 'Enter') submitMessage(); });
+botInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') submitMessage(); });
 
-async function submitMessage(){
-  const text = (botInput.value || '').trim();
+function submitMessage(){
+  const text = botInput.value.trim();
   if(!text) return;
   appendMsg(text, 'user');
   botInput.value = '';
-  // very small intent handling
-  const lower = text.toLowerCase();
-  if(lower.includes('bonjour') || lower.includes('salut')) { appendMsg('Salut 👋 — dis-moi: "emploi", "formation", "abonnement".','bot'); return; }
-  if(lower.includes('emploi')){ appendMsg('Ok. Dis-moi ta ville et domaine (ex: développeur à Douala).','bot'); return; }
-  appendMsg("Désolé, je n'ai pas compris — ou entre le code admin pour ouvrir le panneau.", 'bot');
+
+  if(adminActive){
+    appendMsg("💬 Instruction reçue, enregistrement en cours...");
+    saveInstruction(text);
+  } else {
+    if(text.toLowerCase().includes('bonjour')){
+      appendMsg('Bonjour 👋, je suis ton assistant LesFacilitateurs.');
+    } else if(text.toLowerCase().includes('aide')){
+      appendMsg('Je peux t’aider à te connecter, afficher tes infos, ou contacter l’admin.');
+    } else {
+      appendMsg('Je ne suis pas sûr de comprendre 🤔, essaie "bonjour" ou "aide".');
+    }
+  }
 }
 
-/* ---------- ADMIN UI ---------- */
+/* ---------- enregistrer instruction ---------- */
+async function saveInstruction(content){
+  const { error } = await supabase.from('instructions').insert([{ content }]);
+  if(error){
+    appendMsg('⚠️ Erreur : ' + error.message);
+  } else {
+    appendMsg('✅ Instruction ajoutée avec succès.');
+    await renderAdminPanel();
+  }
+}
+
+/* ---------- panneau admin ---------- */
 async function renderAdminPanel(){
-  // remove any previous admin content messages
-  // create wrapper
-  const adminWrapper = document.createElement('div');
-  adminWrapper.className = 'admin-panel';
-  adminWrapper.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-      <strong>⚙️ Panneau Admin</strong>
-      <button id="refreshUsers" style="margin-left:auto;padding:6px;border-radius:6px;border:none;background:var(--main);color:white;cursor:pointer">Actualiser</button>
+  const { data: instructions } = await supabase.from('instructions').select('*').order('created_at', { ascending: false });
+  const { data: users } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
+
+  let html = `
+  <div class="admin-panel">
+    <h4>🧭 Zone d'instructions</h4>
+    <div style="display:flex;gap:6px;margin-bottom:6px">
+      <input id="newInstruction" placeholder="Nouvelle instruction..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
+      <button id="addInstruction" class="btn unblock">Ajouter</button>
     </div>
-    <div id="adminStatus" class="small" style="margin-bottom:8px;color:var(--muted)">Statut: connexion en cours…</div>
-    <div id="adminContent" style="min-height:80px">Chargement utilisateurs...</div>
-  `;
-  botBody.appendChild(adminWrapper);
-  botBody.scrollTop = botBody.scrollHeight;
+    <div id="instructionList">
+      ${instructions && instructions.length ? instructions.map(i => `
+        <div class="status">
+          ${i.content}
+          <div style="margin-top:4px">
+            <button class="btn unblock" onclick="editInstruction(${i.id})">Modifier</button>
+            <button class="btn block" onclick="deleteInstruction(${i.id})">Supprimer</button>
+          </div>
+        </div>
+      `).join('') : '<p class="small">Aucune instruction enregistrée.</p>'}
+    </div>
+  </div>
 
-  document.getElementById('refreshUsers').addEventListener('click', showAdminUsers);
+  <div class="admin-panel">
+    <h4>👥 Utilisateurs</h4>
+    <table>
+      <thead><tr><th>ID</th><th>Nom</th><th>Téléphone</th><th>Créé le</th></tr></thead>
+      <tbody>
+        ${users && users.length ? users.map(u => `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.name || '-'}</td>
+            <td>${u.phone || '-'}</td>
+            <td>${new Date(u.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join('') : '<tr><td colspan="4">Aucun utilisateur trouvé.</td></tr>'}
+      </tbody>
+    </table>
+  </div>`;
 
-  // test connexion + load users
-  await testSupabaseConnection();
-  await showAdminUsers();
+  botBody.innerHTML = html;
+
+  document.getElementById('addInstruction').addEventListener('click', async ()=>{
+    const val = document.getElementById('newInstruction').value.trim();
+    if(!val) return;
+    await saveInstruction(val);
+  });
 }
 
-async function testSupabaseConnection(){
-  const statusEl = document.getElementById('adminStatus');
-  try{
-    const { data, error } = await supabase.from('users').select('id').limit(1);
-    if(error) { statusEl.innerHTML = `<span class="error">Erreur connexion Supabase: ${error.message || JSON.stringify(error)}</span>`; console.error('Supabase error', error); return false; }
-    statusEl.textContent = 'Statut: connecté ✅';
-    return true;
-  }catch(e){
-    statusEl.innerHTML = `<span class="error">Erreur réseau / CORS: ${e.message}</span>`;
-    console.error(e);
-    return false;
+/* ---------- modifier / supprimer instruction ---------- */
+window.deleteInstruction = async function(id){
+  if(confirm('Supprimer cette instruction ?')){
+    await supabase.from('instructions').delete().eq('id', id);
+    renderAdminPanel();
   }
 }
-
-async function showAdminUsers(){
-  const content = document.getElementById('adminContent');
-  if(!content){ console.warn('adminContent introuvable'); return; }
-  content.innerHTML = 'Chargement utilisateurs...';
-
-  try{
-    const { data, error } = await supabase.from('users').select('id, phone, email, created_at').order('created_at', { ascending: false }).limit(200);
-    if(error){ content.innerHTML = `<div class="error">Erreur lecture users: ${error.message}</div>`; console.error(error); return; }
-    if(!data || data.length === 0){ content.innerHTML = '<div class="small">Aucun utilisateur trouvé.</div>'; return; }
-
-    // build table
-    let html = `<table><thead><tr><th style="width:55%">ID</th><th>Téléphone</th><th>Inscrit</th><th>Actions</th></tr></thead><tbody>`;
-    data.forEach(u => {
-      html += `<tr data-id="${u.id}"><td style="word-break:break-all">${u.id}</td><td>${u.phone||'-'}</td><td>${u.created_at?new Date(u.created_at).toLocaleString():'-'}</td>
-        <td>
-          <button class="btn unblock" data-id="${u.id}">Voir</button>
-          <button class="btn block" data-id="${u.id}">Supprimer</button>
-        </td></tr>`;
-    });
-    html += '</tbody></table>';
-    content.innerHTML = html;
-
-    // wire actions
-    content.querySelectorAll('.btn.unblock').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        await showUserDetails(id);
-      });
-    });
-    content.querySelectorAll('.btn.block').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        if(!confirm('Supprimer cet utilisateur ?')) return;
-        try{
-          const { error } = await supabase.from('users').delete().eq('id', id);
-          if(error){ appendMsg('Erreur suppression: '+(error.message||JSON.stringify(error)),'bot'); console.error(error); }
-          else { appendMsg('Utilisateur supprimé ✅','bot'); await showAdminUsers(); }
-        }catch(e){ appendMsg('Erreur suppression (network)','bot'); console.error(e); }
-      });
-    });
-
-  }catch(e){
-    content.innerHTML = `<div class="error">Erreur inattendue: ${e.message}</div>`;
-    console.error(e);
+window.editInstruction = async function(id){
+  const { data } = await supabase.from('instructions').select('*').eq('id', id).single();
+  if(!data) return;
+  const newText = prompt('Modifier le texte :', data.content);
+  if(newText && newText.trim() !== ''){
+    await supabase.from('instructions').update({ content: newText }).eq('id', id);
+    renderAdminPanel();
   }
 }
-
-async function showUserDetails(userId){
-  appendMsg(`Chargement détails pour ${userId}...`,'bot');
-  try{
-    const { data, error } = await supabase.from('users').select('id, phone, email, created_at, metadata').eq('id', userId).single();
-    if(error){ appendMsg('Erreur récupération utilisateur: '+(error.message||JSON.stringify(error)),'bot'); console.error(error); return; }
-    const lines = [
-      `<strong>Utilisateur</strong>`,
-      `ID: ${data.id}`,
-      `Téléphone: ${data.phone || '-'}`,
-      `Email: ${data.email || '-'}`,
-      `Inscrit: ${data.created_at ? new Date(data.created_at).toLocaleString() : '-'}`,
-      data.metadata ? `Metadata: ${JSON.stringify(data.metadata)}` : ''
-    ].filter(Boolean).join('<br>');
-    appendMsg(lines,'bot');
-  }catch(e){
-    appendMsg('Erreur serveur (détails)','bot');
-    console.error(e);
-  }
-}
-
-/* ---------- START ---------- */
-appendMsg('Bot prêt — clique sur l\'icône en bas à droite. Pour ouvrir le panneau admin : entre le code (233233) et clique ➡ ou appuie Entrée.','bot');
-
 </script>
 </body>
 </html>
