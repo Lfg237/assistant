@@ -3,126 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lesfacilitateurs Bot</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>LesFacilitateurs — Bot & Admin</title>
 <style>
-body {
-  font-family: 'Poppins', sans-serif;
-  background: #f3f4f6;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+:root{
+  --main:#2563eb; --accent:#10b981; --bg:#f3f4f6; --card:#ffffff; --muted:#6b7280;
 }
-#botBox {
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-#botHead {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-#botHead img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-}
-#botMessage {
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-.permission {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f9fafb;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-}
-.permission label {
-  font-size: 14px;
-}
-#validateBtn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 15px;
-}
-#validateBtn:hover {
-  background: #1e4ed8;
-}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:#111827;}
+header{background:linear-gradient(90deg,var(--main),#1d4ed8);color:white;padding:14px;text-align:center;}
+header h1{margin:0;font-size:18px;}
+.container{max-width:1100px;margin:18px auto;padding:0 12px;}
+.card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:12px;}
+#botIcon{position:fixed;right:20px;bottom:20px;width:64px;height:64px;border-radius:999px;background:linear-gradient(135deg,#ffb703,#fb5607);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.18);cursor:pointer;z-index:2000;transition:transform .14s ease;}
+#botIcon:hover{transform: translateY(-4px);}
+#botIcon img{width:68%;height:68%;border-radius:50%;}
+#botWindow{position:fixed;right:20px;bottom:96px;width:380px;max-height:80vh;background:white;border-radius:12px;box-shadow:0 20px 40px rgba(2,6,23,0.18);display:none;flex-direction:column;z-index:2000;}
+#botHead{background:linear-gradient(90deg,var(--main),#3b82f6);color:white;padding:10px 12px;display:flex;align-items:center;gap:8px;}
+#botHead .title{font-weight:600;font-size:14px;flex:1;}
+#botHead input{padding:4px 8px;border-radius:6px;border:none;}
+#botHead button{background:transparent;border:none;color:white;font-size:18px;cursor:pointer;}
+#botBody{padding:10px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;}
+.msg{margin:6px 0;padding:10px;border-radius:10px;max-width:85%;word-break:break-word;}
+.msg.bot{background:#eef2ff;align-self:flex-start;color:#0b1220;}
+.msg.user{background:#e6ffed;align-self:flex-end;color:#0b1220;}
+#botFooter{display:flex;padding:10px;border-top:1px solid #eef2ff;gap:8px;}
+#botFooter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef;}
+#botFooter button{background:var(--main);color:white;border:none;border-radius:8px;padding:10px 12px;cursor:pointer;}
+.admin-panel{background:#fff;border-radius:8px;padding:8px;border:1px solid #eef2ff;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;}
+th{background:#f8fafc;color:#111827;font-weight:600;}
+.btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer;}
+.btn.block{background:#ef4444;color:white;}
+.btn.unblock{background:#10b981;color:white;}
+.small{font-size:12px;color:var(--muted);}
+footer{padding:16px;text-align:center;color:var(--muted);font-size:13px;}
+@media (max-width:480px){#botWindow{right:10px;left:10px;width:auto;bottom:80px;}}
 </style>
 </head>
 <body>
 
-<div id="botBox">
-  <div id="botHead">
-    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="bot">
-    <h3>Lesfacilitateurs Middleman 🤖</h3>
-  </div>
-  <div id="botMessage">
-    Bonjour 👋 je suis votre assistant personnel.<br><br>
-    Avant de commencer, j’ai besoin de quelques autorisations pour mieux vous aider :
-  </div>
+<header>
+  <h1>LesFacilitateurs — Plateforme</h1>
+</header>
 
-  <div id="permissions">
-    <div class="permission"><label>📍 Localisation</label><input type="checkbox" id="loc"></div>
-    <div class="permission"><label>🔔 Notifications</label><input type="checkbox" id="notif"></div>
-    <div class="permission"><label>📞 Appels sortants</label><input type="checkbox" id="calls"></div>
-    <div class="permission"><label>💬 Conversations simulées</label><input type="checkbox" id="chat"></div>
+<main class="container">
+  <div class="card">
+    <h3>Tableau de bord</h3>
+    <p class="small">Clique sur le bot en bas à droite pour ouvrir.</p>
   </div>
+</main>
 
-  <button id="validateBtn">Valider mes autorisations</button>
+<div id="botIcon" title="LesFacilitateurs">
+  <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" alt="avatar">
 </div>
 
-<script>
-const SUPABASE_URL = "https://nqqlsntgmorujffrntih.supabase.co";
-const SUPABASE_KEY = "+4f2y&Eq!2DWVZa";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<div id="botWindow" aria-hidden="true">
+  <div id="botHead">
+    <div class="title">🤵🏿 LesFacilitateurs</div>
+    <input id="adminCodeInput" type="password" placeholder="Code admin">
+    <button id="closeBot" title="Fermer">✖</button>
+  </div>
+  <div id="botBody" aria-live="polite">
+    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs Middleman. Tapez le code admin pour accéder aux fonctionnalités.</div>
+  </div>
+  <div id="botFooter">
+    <input id="botInput" type="text" placeholder="Écris un message..." autocomplete="off">
+    <button id="sendBtn">Envoyer</button>
+  </div>
+</div>
 
-// Simule un identifiant unique (tu peux remplacer par un vrai ID utilisateur plus tard)
-const userId = "user_" + Math.random().toString(36).substring(2,10);
+<footer>
+  © LesFacilitateurs — clé Supabase dans env.js
+</footer>
 
-// Sauvegarde dans Supabase
-document.getElementById('validateBtn').addEventListener('click', async ()=>{
-  const permissions = {
-    localisation: document.getElementById('loc').checked,
-    notifications: document.getElementById('notif').checked,
-    appels: document.getElementById('calls').checked,
-    chat: document.getElementById('chat').checked
-  }
+<script type="module">
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './env.js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-  // Insertion ou mise à jour
-  const { data, error } = await supabase
-    .from('user_permissions')
-    .upsert([{ 
-      id: userId,
-      permissions,
-      created_at: new Date()
-    }])
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  if(error){
-    alert("⚠️ Erreur d’enregistrement : " + error.message)
-  } else {
-    alert("✅ Autorisations enregistrées ! Bienvenue à bord 🌍")
-    document.getElementById('botMessage').innerHTML = 
-      "Merci d’avoir configuré vos autorisations. Vous pouvez maintenant utiliser toutes les fonctionnalités du bot.";
+const botIcon = document.getElementById('botIcon');
+const botWindow = document.getElementById('botWindow');
+const closeBot = document.getElementById('closeBot');
+const botBody = document.getElementById('botBody');
+const botInput = document.getElementById('botInput');
+const sendBtn = document.getElementById('sendBtn');
+const adminCodeInput = document.getElementById('adminCodeInput');
+
+const ADMIN_CODE = '233233';
+let adminActive = false;
+let currentUserId = 'user-' + crypto.randomUUID().slice(0,8);
+
+function appendMsg(text, from='bot'){
+  const div = document.createElement('div');
+  div.className = 'msg ' + (from==='bot'?'bot':'user');
+  div.innerHTML = text;
+  botBody.appendChild(div);
+  botBody.scrollTop = botBody.scrollHeight;
+}
+
+// Open/close bot
+botIcon.addEventListener('click', ()=>{
+  const visible = botWindow.style.display === 'flex';
+  botWindow.style.display = visible ? 'none':'flex';
+  botWindow.setAttribute('aria-hidden', visible?'true':'false');
+});
+closeBot.addEventListener('click', ()=>{
+  botWindow.style.display = 'none';
+  botWindow.setAttribute('aria-hidden','true');
+});
+
+// Handle admin code
+adminCodeInput.addEventListener('keypress',(e)=>{
+  if(e.key==='Enter'){
+    if(adminCodeInput.value===ADMIN_CODE){
+      adminActive=true;
+      appendMsg('Accès admin validé ✅','bot');
+      showAdminPanel();
+      adminCodeInput.value='';
+    }else{
+      appendMsg('Code invalide ❌','bot');
+    }
   }
 });
-</script>
 
-</body>
-                              </html>
+// Send messages
+sendBtn.addEventListener('click', submitMessage);
+botInput.addEventListener('keypress',(e)=>{ if(e.key==='Enter') submitMessage(); });
+
+async function submitMessage(){
+  const text = (botInput.value||'').trim();
+  if(!text) return;
+  appendMsg(text,'user');
+  botInput.value='';
+  await processUserMessage(text);
+}
+
+async function processUserMessage(text){
+  const lower = text.toLowerCase().trim();
+  if(lower.includes('bonjour') || lower.includes('salut')){
+    appendMsg('Salut 👋 — dis-moi ton besoin : emploi, formation, abonnement','bot');
+    return;
+  }
+  appendMsg('Je n\'ai pas compris. Tape le code admin pour accéder au panneau.','bot');
+}
+
+// Admin panel
+async function showAdminPanel(){
+  botBody.innerHTML='';
+  const wrapper = document.createElement('div');
+  wrapper.className='admin-panel';
+  wrapper.innerHTML=`
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+      <strong>⚙️ Panneau Admin</strong>
+    </div>
+    <div id="adminContent" style="min-height:80px;">Chargement utilisateurs...</div>
+  `;
+  botBody.appendChild(wrapper);
+
+  try{
+    const {data,error}=await supabase.from('users').select('id, phone, created_at').order('created_at',{ascending:false});
+    const container=document.getElementById('adminContent');
+    if(error){container.innerHTML='Erreur chargement utilisateurs';return;}
+    if(!data||data.length===0){container.innerHTML = 'Aucun utilisateur trouvé.'; return; }
+
+    // Création du tableau
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th>ID</th>
+        <th>Téléphone</th>
+        <th>Créé le</th>
+        <th>Actions</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    data.forEach(user => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${user.id}</td>
+        <td>${user.phone || '-'}</td>
+        <td>${new Date(user.created_at).toLocaleString()}</td>
+        <td>
+          <button class="btn unblock" data-id="${user.id}">Voir</button>
+          <button class="btn block" data-id="${user.id}">Supprimer</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    container.innerHTML = '';
+    container.appendChild(table);
+
+    // Actions boutons
+    table.querySelectorAll('.btn.unblock').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const id = btn.dataset.id;
+        appendMsg(`💻 Informations utilisateur ID: ${id} (affiche détails ici)`, 'bot');
+      });
+    });
+
+    table.querySelectorAll('.btn.block').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const id = btn.dataset.id;
+        if(confirm('Supprimer cet utilisateur ?')){
+          const {error} = await supabase.from('users').delete().eq('id', id);
+          if(error) appendMsg('Erreur suppression: '+error.message,'bot');
+          else{
+            appendMsg('Utilisateur supprimé ✅','bot');
+            showAdminPanel(); // recharge le tableau
+          }
+        }
+      });
+    });
+
+  }catch(err){
+    console.error(err);
+    appendMsg('Erreur serveur ⚠️','bot');
+  }
+}
+</script>
+</script>
+</html>
