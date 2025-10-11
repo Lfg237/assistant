@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesfacilitateurs Bot</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f3f4f6;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+#botBox {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+#botHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+#botHead img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+#botMessage {
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+.permission {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.permission label {
+  font-size: 14px;
+}
+#validateBtn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 15px;
+}
+#validateBtn:hover {
+  background: #1e4ed8;
+}
+</style>
+</head>
+<body>
+
+<div id="botBox">
+  <div id="botHead">
+    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="bot">
+    <h3>Lesfacilitateurs Middleman 🤖</h3>
+  </div>
+  <div id="botMessage">
+    Bonjour 👋 je suis votre assistant personnel.<br><br>
+    Avant de commencer, j’ai besoin de quelques autorisations pour mieux vous aider :
+  </div>
+
+  <div id="permissions">
+    <div class="permission"><label>📍 Localisation</label><input type="checkbox" id="loc"></div>
+    <div class="permission"><label>🔔 Notifications</label><input type="checkbox" id="notif"></div>
+    <div class="permission"><label>📞 Appels sortants</label><input type="checkbox" id="calls"></div>
+    <div class="permission"><label>💬 Conversations simulées</label><input type="checkbox" id="chat"></div>
+  </div>
+
+  <button id="validateBtn">Valider mes autorisations</button>
+</div>
+
+<script>
+const SUPABASE_URL = "https://nqqlsntgmorujffrntih.supabase.co";
+const SUPABASE_KEY = "+4f2y&Eq!2DWVZa";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Simule un identifiant unique (tu peux remplacer par un vrai ID utilisateur plus tard)
+const userId = "user_" + Math.random().toString(36).substring(2,10);
+
+// Sauvegarde dans Supabase
+document.getElementById('validateBtn').addEventListener('click', async ()=>{
+  const permissions = {
+    localisation: document.getElementById('loc').checked,
+    notifications: document.getElementById('notif').checked,
+    appels: document.getElementById('calls').checked,
+    chat: document.getElementById('chat').checked
+  }
+
+  // Insertion ou mise à jour
+  const { data, error } = await supabase
+    .from('user_permissions')
+    .upsert([{ 
+      id: userId,
+      permissions,
+      created_at: new Date()
+    }])
+
+  if(error){
+    alert("⚠️ Erreur d’enregistrement : " + error.message)
+  } else {
+    alert("✅ Autorisations enregistrées ! Bienvenue à bord 🌍")
+    document.getElementById('botMessage').innerHTML = 
+      "Merci d’avoir configuré vos autorisations. Vous pouvez maintenant utiliser toutes les fonctionnalités du bot.";
+  }
+});
+</script>
+
+</body>
+                              </html>
