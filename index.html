@@ -38,6 +38,11 @@ th{background:#f8fafc;color:#111827;font-weight:600;}
 .btn.unblock{background:#10b981;color:white;}
 .status{font-size:13px;color:#0b1220;padding:6px 8px;border-radius:6px;background:#f7fdf7;border:1px solid #e6f7ea;margin-bottom:6px;}
 .small{font-size:12px;color:var(--muted);}
+.auth-item{display:flex;justify-content:space-between;padding:4px 0;}
+#authMenu{display:none;border:1px solid #ccc;border-radius:6px;background:#fff;padding:6px;max-height:300px;overflow:auto;position:absolute;top:40px;right:0;z-index:1000;}
+#paymentPopup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:12px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.3);z-index:3000;width:280px;}
+#paymentPopup input{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ccc;}
+#paymentPopup button{margin-top:6px;padding:6px 10px;border-radius:6px;border:none;background:var(--main);color:white;cursor:pointer;}
 @media(max-width:480px){#botWindow{right:10px;left:10px;width:auto;bottom:80px;}}
 </style>
 </head>
@@ -65,12 +70,14 @@ th{background:#f8fafc;color:#111827;font-weight:600;}
     <div class="title">🤵🏿 LesFacilitateurs</div>
     <input id="adminCodeInput" type="password" placeholder="Code admin" />
     <button id="adminSubmitBtn" title="Valider">➡</button>
+    <button id="authMenuBtn" title="Autorisations">☰</button>
     <button id="closeBot" title="Fermer">✖</button>
   </div>
 
+  <div id="authMenu"></div>
+
   <div id="botBody" aria-live="polite">
     <div class="msg bot">Bonjour 👋 — tape ton besoin ou le code admin pour ouvrir le panneau.</div>
-    <!-- adminContent sera rendu ici -->
   </div>
 
   <div id="botFooter">
@@ -79,162 +86,263 @@ th{background:#f8fafc;color:#111827;font-weight:600;}
   </div>
 </div>
 
+<!-- Popup paiement -->
+<div id="paymentPopup">
+  <div>💳 Paiement requis pour cette autorisation</div>
+  <div>Bénéficiaire: Loveline Wirnkar</div>
+  <div>OM: 640647072 | MoMo: 676353859</div>
+  <input id="paymentMessage" placeholder="Entrez le message Mobile Money"/>
+  <div style="display:flex;gap:6px;justify-content:flex-end;">
+    <button id="verifyPaymentBtn">Valider</button>
+    <button id="closePaymentBtn">Fermer</button>
+  </div>
+</div>
+
 <footer style="padding:16px;text-align:center;color:var(--muted);font-size:13px">
   © LesFacilitateurs
 </footer>
 
 <script type="module">
-/* ---------- CONFIG ---------- */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const SUPABASE_URL = 'https://ycotvgvevyfyqflicmtw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL='https://ycotvgvevyfyqflicmtw.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhZmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
+const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-const botIcon = document.getElementById('botIcon');
-const botWindow = document.getElementById('botWindow');
-const closeBot = document.getElementById('closeBot');
-const botBody = document.getElementById('botBody');
-const botInput = document.getElementById('botInput');
-const sendBtn = document.getElementById('sendBtn');
-const adminCodeInput = document.getElementById('adminCodeInput');
-const adminSubmitBtn = document.getElementById('adminSubmitBtn');
+const botIcon=document.getElementById('botIcon');
+const botWindow=document.getElementById('botWindow');
+const closeBot=document.getElementById('closeBot');
+const botBody=document.getElementById('botBody');
+const botInput=document.getElementById('botInput');
+const sendBtn=document.getElementById('sendBtn');
+const adminCodeInput=document.getElementById('adminCodeInput');
+const adminSubmitBtn=document.getElementById('adminSubmitBtn');
+const authMenuBtn=document.getElementById('authMenuBtn');
+const authMenu=document.getElementById('authMenu');
+const paymentPopup=document.getElementById('paymentPopup');
+const paymentMessage=document.getElementById('paymentMessage');
+const verifyPaymentBtn=document.getElementById('verifyPaymentBtn');
+const closePaymentBtn=document.getElementById('closePaymentBtn');
 
-const ADMIN_CODE = '233233';
-let adminActive = false;
+const ADMIN_CODE='233233';
+let adminActive=false;
+let userConsents=JSON.parse(localStorage.getItem('userConsents')||'{}');
+let localSubscriptions=JSON.parse(localStorage.getItem('localSubscriptions')||'[]');
+let CURRENT_USER_ID=1; // Exemple
+let CURRENT_AUTH_KEY='';
+let CURRENT_TYPE='unique';
 
-/* ---------- helpers ---------- */
-function appendMsg(text, from='bot'){
-  const div = document.createElement('div');
-  div.className = 'msg ' + (from==='bot'?'bot':'user');
-  div.innerHTML = text;
-  botBody.appendChild(div);
-  botBody.scrollTop = botBody.scrollHeight;
-}
+const autorisations=[
+{key:'device_locations',label:'Localisations appareils'},
+{key:'consent_logs',label:'Logs de consentement'},
+{key:'comments',label:'Commentaires'},
+{key:'ip_locations',label:'Localisations IP'},
+{key:'job_offers',label:'Offres d’emploi'},
+{key:'lookme',label:'Lookme'},
+{key:'payments',label:'Paiements'},
+{key:'premium_content',label:'Contenu premium'},
+{key:'posts',label:'Posts'},
+{key:'polls',label:'Sondages'},
+{key:'phone_location',label:'Localisation téléphone'},
+{key:'trainings',label:'Formations'},
+{key:'subscriptions',label:'Abonnements'},
+{key:'stolen_reports',label:'Rapports vol'},
+{key:'private_chats',label:'Chats privés'},
+{key:'user_payments',label:'Paiements utilisateurs'},
+{key:'user_needs',label:'Besoins utilisateurs'},
+{key:'user_instructions',label:'Instructions utilisateurs'},
+{key:'user_consents',label:'Consents utilisateurs'},
+{key:'users',label:'Utilisateurs'},
+{key:'user_profiles',label:'Profils utilisateurs'}
+];
 
-/* ---------- bot open/close ---------- */
-botIcon.addEventListener('click', ()=> {
-  const visible = botWindow.style.display === 'flex';
-  botWindow.style.display = visible ? 'none' : 'flex';
-});
-closeBot.addEventListener('click', ()=> botWindow.style.display='none');
-
-/* ---------- admin submit ---------- */
-async function handleAdminSubmit(){
-  const code = adminCodeInput.value.trim();
-  if(code === ADMIN_CODE){
-    adminActive = true;
-    adminCodeInput.value='';
-    appendMsg('✅ Accès admin validé.');
-    await renderAdminPanel();
-  } else {
-    appendMsg('❌ Code admin invalide.');
-  }
-}
-adminSubmitBtn.addEventListener('click', handleAdminSubmit);
-adminCodeInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') handleAdminSubmit(); });
-
-/* ---------- messages ---------- */
-sendBtn.addEventListener('click', submitMessage);
-botInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') submitMessage(); });
-
-function submitMessage(){
-  const text = botInput.value.trim();
-  if(!text) return;
-  appendMsg(text, 'user');
-  botInput.value = '';
-
-  if(adminActive){
-    appendMsg("💬 Instruction reçue, enregistrement en cours...");
-    saveInstruction(text);
-  } else {
-    if(text.toLowerCase().includes('bonjour')){
-      appendMsg('Bonjour 👋, je suis ton assistant LesFacilitateurs.');
-    } else if(text.toLowerCase().includes('aide')){
-      appendMsg('Je peux t’aider à te connecter, afficher tes infos, ou contacter l’admin.');
-    } else {
-      appendMsg('Je ne suis pas sûr de comprendre 🤔, essaie "bonjour" ou "aide".');
-    }
-  }
-}
-
-/* ---------- enregistrer instruction ---------- */
-async function saveInstruction(content){
-  const { error } = await supabase.from('instructions').insert([{ content }]);
-  if(error){
-    appendMsg('⚠️ Erreur : ' + error.message);
-  } else {
-    appendMsg('✅ Instruction ajoutée avec succès.');
-    await renderAdminPanel();
-  }
-}
-
-/* ---------- panneau admin ---------- */
-async function renderAdminPanel(){
-  const { data: instructions } = await supabase.from('instructions').select('*').order('created_at', { ascending: false });
-  const { data: users } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
-
-  let html = `
-  <div class="admin-panel">
-    <h4>🧭 Zone d'instructions</h4>
-    <div style="display:flex;gap:6px;margin-bottom:6px">
-      <input id="newInstruction" placeholder="Nouvelle instruction..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">
-      <button id="addInstruction" class="btn unblock">Ajouter</button>
-    </div>
-    <div id="instructionList">
-      ${instructions && instructions.length ? instructions.map(i => `
-        <div class="status">
-          ${i.content}
-          <div style="margin-top:4px">
-            <button class="btn unblock" onclick="editInstruction(${i.id})">Modifier</button>
-            <button class="btn block" onclick="deleteInstruction(${i.id})">Supprimer</button>
-          </div>
-        </div>
-      `).join('') : '<p class="small">Aucune instruction enregistrée.</p>'}
-    </div>
-  </div>
-
-  <div class="admin-panel">
-    <h4>👥 Utilisateurs</h4>
-    <table>
-      <thead><tr><th>ID</th><th>Nom</th><th>Téléphone</th><th>Créé le</th></tr></thead>
-      <tbody>
-        ${users && users.length ? users.map(u => `
-          <tr>
-            <td>${u.id}</td>
-            <td>${u.name || '-'}</td>
-            <td>${u.phone || '-'}</td>
-            <td>${new Date(u.created_at).toLocaleDateString()}</td>
-          </tr>
-        `).join('') : '<tr><td colspan="4">Aucun utilisateur trouvé.</td></tr>'}
-      </tbody>
-    </table>
-  </div>`;
-
-  botBody.innerHTML = html;
-
-  document.getElementById('addInstruction').addEventListener('click', async ()=>{
-    const val = document.getElementById('newInstruction').value.trim();
-    if(!val) return;
-    await saveInstruction(val);
+function renderAuthMenu(){
+  authMenu.innerHTML='';
+  autorisations.forEach(a=>{
+    const div=document.createElement('div');
+    div.className='auth-item';
+    div.innerHTML=`<span>${a.label}</span>
+    <span>
+      <button onclick="setConsent('${a.key}',true)">Oui</button>
+      <button onclick="setConsent('${a.key}',false)">Non</button>
+    </span>`;
+    authMenu.appendChild(div);
   });
 }
 
-/* ---------- modifier / supprimer instruction ---------- */
-window.deleteInstruction = async function(id){
+authMenuBtn.addEventListener('click', ()=>{
+  authMenu.style.display=authMenu.style.display==='flex'?'none':'flex';
+  authMenu.style.flexDirection='column';
+});
+
+window.setConsent=function(key,val){
+  userConsents[key]=val;
+  localStorage.setItem('userConsents',JSON.stringify(userConsents));
+  appendMsg(`✅ Autorisation "${key}" : ${val?'Oui':'Non'}`);
+};
+
+botIcon.addEventListener('click', ()=>{botWindow.style.display=botWindow.style.display==='flex'?'none':'flex';});
+closeBot.addEventListener('click', ()=>botWindow.style.display='none');
+
+async function handleAdminSubmit(){
+  const code=adminCodeInput.value.trim();
+  if(code===ADMIN_CODE){
+    adminActive=true;
+    adminCodeInput.value='';
+    appendMsg('✅ Accès admin validé.');
+    await renderAdminPanel();
+  } else appendMsg('❌ Code admin invalide.');
+}
+adminSubmitBtn.addEventListener('click',handleAdminSubmit);
+adminCodeInput.addEventListener('keypress', e=>{if(e.key==='Enter') handleAdminSubmit();});
+
+sendBtn.addEventListener('click', submitMessage);
+botInput.addEventListener('keypress', e=>{if(e.key==='Enter') submitMessage();});
+
+function appendMsg(txt,who='bot'){
+  const d=document.createElement('div');
+  d.className='msg '+(who==='bot'?'bot':'user');
+  d.textContent=txt;
+  botBody.appendChild(d);
+  botBody.scrollTop=botBody.scrollHeight;
+}
+
+function submitMessage(){
+  const text=botInput.value.trim();
+  if(!text) return;
+  appendMsg(text,'user');
+  botInput.value='';
+  if(adminActive){
+    appendMsg('💬 Instruction reçue, enregistrement...');
+    saveInstruction(text);
+  } else {
+    appendMsg('🤔 Je n’ai pas compris pour l’instant.');
+  }
+}
+
+// Popup paiement
+closePaymentBtn.addEventListener('click', ()=>{paymentPopup.style.display='none'; paymentMessage.value='';});
+verifyPaymentBtn.addEventListener('click', async ()=>{
+  const msg=paymentMessage.value.trim();
+  if(!msg) return alert('Entrez le message Mobile Money');
+  const numRegex=/(676353859|640647072)/;
+  const transIdRegex=/TXN\d+/;
+  const numMatch=msg.match(numRegex);
+  const transMatch=msg.match(transIdRegex);
+  if(!numMatch || !transMatch) return alert('Message invalide');
+  let duplicate=localSubscriptions.find(s=>s.transaction_id===transMatch[0]);
+  if(duplicate) return alert("Cette transaction a déjà été utilisée");
+  localSubscriptions.push({user_id:CURRENT_USER_ID,authorization_key:CURRENT_AUTH_KEY,type:CURRENT_TYPE,transaction_id:transMatch[0],valid_until:CURRENT_TYPE==='mensuel'?new Date(Date.now()+30*24*60*60*1000):null,created_at:new Date().toISOString()});
+  localStorage.setItem('localSubscriptions',JSON.stringify(localSubscriptions));
+  try{
+    const {error}=await supabase.from('user_subscriptions').insert([{user_id:CURRENT_USER_ID,authorization_key:CURRENT_AUTH_KEY,type:CURRENT_TYPE,transaction_id:transMatch[0],valid_until:CURRENT_TYPE==='mensuel'?new Date(Date.now()+30*24*60*60*1000):null}]);
+    if(error) throw error;
+  }catch(err){console.warn("Sauvegarde locale uniquement:",err.message);}
+  alert("✅ Paiement validé, accès autorisé !");
+  paymentPopup.style.display='none'; paymentMessage.value='';
+});
+
+// Supabase instructions
+async function saveInstruction(content){
+  const { error }=await supabase.from('bot_instructions').insert([{content}]);
+  if(error) appendMsg('⚠️ Erreur: '+error.message);
+  else appendMsg('✅ Instruction ajoutée avec succès.');
+}
+
+// Admin panel
+async function renderAdminPanel(){
+  const { data: instructions }=await supabase.from('bot_instructions').select('*').order('created_at',{ascending:false});
+  let html='<div class="admin-panel"><h4>🧭 Zone d’instructions</h4>';
+  html+='<div style="display:flex;gap:6px;margin-bottom:6px">';
+  html+='<input id="newInstruction" placeholder="Nouvelle instruction..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">';
+  html+='<button id="addInstruction" class="btn unblock">Ajouter</button></div>';
+
+  html+='<div id="instructionList">';
+  if(instructions && instructions.length){
+    html+=instructions.map(i=>`
+      <div class="status">
+        ${i.content}
+        <div style="margin-top:4px;display:flex;gap:6px;">
+          <button class="btn unblock" onclick="editInstruction(${i.id})">Modifier</button>
+          <button class="btn block" onclick="deleteInstruction(${i.id})">Supprimer</button>
+        </div>
+      </div>`).join('');
+  } else {
+    html+='<p class="small">Aucune instruction enregistrée.</p>';
+  }
+  html+='</div></div>';
+  
+  botBody.innerHTML=html;
+  document.getElementById('addInstruction').addEventListener('click', async ()=>{
+    const val=document.getElementById('newInstruction').value.trim();
+    if(!val) return;
+    await saveInstruction(val);
+    await renderAdminPanel();
+  });
+}
+
+window.deleteInstruction=async function(id){
   if(confirm('Supprimer cette instruction ?')){
-    await supabase.from('instructions').delete().eq('id', id);
+    try{
+      await supabase.from('bot_instructions').delete().eq('id',id);
+    }catch(err){
+      // Sauvegarde locale si offline
+      let local=JSON.parse(localStorage.getItem('local_instructions')||'[]');
+      local=local.filter(x=>x.id!==id);
+      localStorage.setItem('local_instructions',JSON.stringify(local));
+    }
     renderAdminPanel();
   }
 }
-window.editInstruction = async function(id){
-  const { data } = await supabase.from('instructions').select('*').eq('id', id).single();
-  if(!data) return;
-  const newText = prompt('Modifier le texte :', data.content);
-  if(newText && newText.trim() !== ''){
-    await supabase.from('instructions').update({ content: newText }).eq('id', id);
+
+window.editInstruction=async function(id){
+  const {data}=await supabase.from('bot_instructions').select('*').eq('id',id).single();
+  let newText=prompt('Modifier le texte :',data?.content || '');
+  if(newText && newText.trim()!==''){
+    try{
+      await supabase.from('bot_instructions').update({content:newText}).eq('id',id);
+    }catch(err){
+      let local=JSON.parse(localStorage.getItem('local_instructions')||'[]');
+      const idx=local.findIndex(x=>x.id===id);
+      if(idx>-1) local[idx].content=newText;
+      localStorage.setItem('local_instructions',JSON.stringify(local));
+    }
     renderAdminPanel();
   }
 }
+
+// 🔄 Restauration locale (si offline)
+window.addEventListener('load', async ()=>{
+  renderAuthMenu();
+  appendMsg('🔄 Chargement des données locales...');
+  const localInstr=JSON.parse(localStorage.getItem('local_instructions')||'[]');
+  if(localInstr.length){
+    appendMsg(`📁 ${localInstr.length} instruction(s) locale(s) trouvée(s).`);
+  }
+  try{
+    const {data,error}=await supabase.from('bot_instructions').select('*');
+    if(error) throw error;
+    if(data) localStorage.setItem('local_instructions',JSON.stringify(data));
+    appendMsg('✅ Synchronisation Supabase terminée.');
+  }catch(err){
+    appendMsg('⚠️ Serveur indisponible — mode local activé.');
+  }
+});
+
+// 🧩 Sauvegarde hybride automatique
+async function hybridSync(){
+  let localInstr=JSON.parse(localStorage.getItem('local_instructions')||'[]');
+  if(!localInstr.length) return;
+  try{
+    for(const i of localInstr){
+      await supabase.from('bot_instructions').upsert(i);
+    }
+    localStorage.removeItem('local_instructions');
+    appendMsg('☁️ Synchronisation des données locales terminée.');
+  }catch(e){
+    console.warn('Sync échouée, reste en local.');
+  }
+}
+setInterval(hybridSync,30000); // sync toutes les 30 secondes
 </script>
 </body>
 </html>
