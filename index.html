@@ -73,24 +73,26 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   <h2>🔒 Tableau administrateur</h2>
   <h3>Instructions <button id="addInstrBtn">+</button></h3>
   <table class="table" id="instrTable"><thead><tr><th>ID</th><th>Instruction</th><th>Actions</th></tr></thead><tbody></tbody></table>
+  <h3>Autorisations <button id="addAuthBtn">+</button></h3>
+  <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
 </div>
 
-<!-- Supabase via CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
 <script>
-// --- Supabase ---
-const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+// Données locales pour tester sans Supabase
+let instructions = JSON.parse(localStorage.getItem('bot_instructions')) || [];
+let authorizations = JSON.parse(localStorage.getItem('bot_authorizations')) || [
+  {name:'Historique appels',mode:'free'},
+  {name:'Écoute téléphone',mode:'payant'}
+];
+let conversations = JSON.parse(localStorage.getItem('bot_conversations'))||[];
 
-let instructions = [];
-
-// --- Éléments ---
+// Éléments
 const botFloat=document.getElementById('botFloat');
 const botBox=document.getElementById('botBox');
 const botBody=document.getElementById('botBody');
 const inputText=document.getElementById('inputText');
 const sendBtn=document.getElementById('sendBtn');
+const micBtn=document.getElementById('micBtn');
 const adminInput=document.getElementById('adminInput');
 const adminBtn=document.getElementById('adminBtn');
 const adminPanel=document.getElementById('adminPanel');
@@ -98,79 +100,246 @@ const backHomeBtn=document.getElementById('backHomeBtn');
 const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
 const addInstrBtn=document.getElementById('addInstrBtn');
 
-// --- Fonctions Supabase ---
-async function loadInstructions(){
-  const { data, error } = await supabase.from('bot_instructions').select('*');
-  if(error){ console.error(error); return; }
-  instructions = data;
-  renderInstrTable();
+// Fonctions
+function appendMsg(sender,text){
+  const div=document.createElement('div');
+  div.className='msg '+sender;
+  div.innerHTML=text;
+  botBody.appendChild(div);
+  botBody.scrollTop=botBody.scrollHeight;
 }
-async function addInstruction(text){
-  const { data, error } = await supabase.from('bot_instructions').insert([{instruction:text}]).select();
-  if(error){ alert(error.message); return; }
-  instructions.push(data[0]);
-  renderInstrTable();
-}
-async function editInstruction(id,newText){
-  const { data, error } = await supabase.from('bot_instructions').update({instruction:newText}).eq('id',id).select();
-  if(error){ alert(error.message); return; }
-  await loadInstructions();
-}
-async function deleteInstruction(id){
-  if(!confirm('Supprimer ?')) return;
-  const { error } = await supabase.from('bot_instructions').delete().eq('id',id);
-  if(error){ alert(error.message); return; }
-  await loadInstructions();
-}
-
-// --- Rendu tableau ---
 function renderInstrTable(){
   instrTableBody.innerHTML='';
-  instructions.forEach(i=>{
+  instructions.forEach((i,index)=>{
     const row=document.createElement('tr');
-    row.innerHTML=`<td>${i.id}</td><td>${i.instruction}</td>
+    row.innerHTML=`<td>${index+1}</td><td>${i}</td>
       <td>
-        <button class="action-btn" onclick="editInstrPrompt(${i.id},'${i.instruction.replace(/'/g,"\\'")}')">Modifier</button>
-        <button class="action-btn" onclick="deleteInstruction(${i.id})">Supprimer</button>
+        <button class="action-btn" onclick="editInstrPrompt(${index})">Modifier</button>
+        <button class="action-btn" onclick="deleteInstruction(${index})">Supprimer</button>
       </td>`;
     instrTableBody.appendChild(row);
   });
+  localStorage.setItem('bot_instructions',JSON.stringify(instructions));
+}
+window.editInstrPrompt=(i)=>{
+  const t = prompt('Modifier instruction:',instructions[i]);
+  if(t){ instructions[i]=t; renderInstrTable(); }
+};
+function deleteInstruction(i){
+  if(confirm('Supprimer ?')){ instructions.splice(i,1); renderInstrTable(); }
 }
 
-// --- Hooks pour edit prompt ---
-window.editInstrPrompt = async (id,oldText)=>{
-  const t = prompt('Modifier instruction:',oldText);
-  if(t) await editInstruction(id,t);
-};
-
-// --- Admin login ---
-adminBtn.onclick=()=>{
-  if(adminInput.value==='233233'){
-    adminPanel.style.display='block';
-    botBox.style.display='none';
-    loadInstructions();
-  }else alert('Code incorrect');
-};
+// Admin login
+adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none'; renderInstrTable(); }else alert('Code incorrect'); }
 backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
 
-// --- Ajouter instruction ---
-addInstrBtn.onclick=async ()=>{
-  const text = prompt('Nouvelle instruction:');
-  if(!text) return;
-  await addInstruction(text);
+// Ajouter instruction
+addInstrBtn.onclick=()=>{
+  const t = prompt('Nouvelle instruction:');
+  if(t){ instructions.push(t); renderInstrTable(); }
 };
 
-// --- Bot toggle ---
+// Bot toggle
 botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
 
-// --- Messages ---
+// Messages
 sendBtn.onclick=()=>{ 
   const text=inputText.value.trim(); 
   if(!text) return; 
-  const instr = instructions.length>0 ? instructions[Math.floor(Math.random()*instructions.length)] : {instruction:'Merci pour ton message !'};
-  botBody.innerHTML += `<div class="msg user">${text}</div><div class="msg bot">${instr.instruction}</div>`;
-  botBody.scrollTop = botBody.scrollHeight;
+  appendMsg('user', text); 
+  inputText.value='';
+  if(instructions.length>0){
+    const instr = instructions[Math.floor(Math.random()*instructions.length)];
+    appendMsg('bot', instr);
+  }else appendMsg('bot','Merci pour ton message !');
 };
+
+// Charger conversations
+conversations.forEach(c=>{ appendMsg('user',c.user); appendMsg('bot',c.bot); });
+
+// Nettoyage 72h
+function cleanOldConversations(){
+  const now=new Date();
+  conversations = conversations.filter(c=>{
+    const d=new Date(c.created_at);
+    return (now-d)/(1000*60*60)<72;
+  });
+  localStorage.setItem('bot_conversations',JSON.stringify(conversations));
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LesFacilitateurs</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="https://i.ibb.co/4JH0qZt/african-head.png" type="image/png">
+<style>
+:root{
+  --bg: #0b1220;
+  --accent:#2563eb;
+  --card: rgba(255,255,255,0.03);
+  --text:#e6eef8;
+}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);}
+#botFloat{position:fixed;left:20px;bottom:20px;width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;}
+#botFloat img{width:60%;height:60%;border-radius:50%;}
+#botBox{position:fixed;left:20px;bottom:110px;width:350px;max-height:80vh;background:var(--card);border-radius:12px;display:none;flex-direction:column;overflow:hidden;z-index:1000;backdrop-filter:blur(6px);}
+#botHead{padding:10px;background:var(--accent);color:white;display:flex;align-items:center;gap:8px;}
+#botHead .title{font-weight:700;flex:1;}
+#adminCode input{background: rgba(255,255,255,0.08);border:none;padding:6px 8px;border-radius:6px;color:white;outline:none;width:120px;}
+#adminCode button{background:rgba(255,255,255,0.12);border:none;color:white;padding:6px 8px;border-radius:6px;cursor:pointer;}
+#botBody{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
+.msg{max-width:86%;padding:8px 10px;border-radius:10px;line-height:1.35;font-size:14px;}
+.msg.bot{background: rgba(255,255,255,0.04);align-self:flex-start;color:#e6eef8;}
+.msg.user{background: rgba(255,255,255,0.06);align-self:flex-end;color:#041025;}
+#botFooter{display:flex;padding:8px;border-top:1px solid rgba(255,255,255,0.05);gap:6px;}
+#botFooter input{flex:1;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:white;outline:none;}
+#botFooter button{padding:6px 10px;border:none;border-radius:8px;background:var(--accent);color:white;cursor:pointer;}
+#authList{display:none;position:absolute;bottom:90px;left:100px;width:200px;background:var(--card);padding:8px;border-radius:8px;max-height:200px;overflow:auto;}
+.auth-item{display:flex;justify-content:space-between;margin-bottom:4px;}
+#adminPanel{position:fixed;left:20px;top:20px;right:20px;bottom:20px;background:var(--card);border-radius:12px;padding:18px;display:none;overflow:auto;z-index:900;}
+.table{width:100%;border-collapse:collapse;}
+.table th{background:var(--accent);color:white;padding:8px;text-align:left;}
+.table td{padding:6px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.action-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:white;padding:4px 6px;border-radius:6px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- BOT FLOAT -->
+<div id="botFloat" title="LesFacilitateurs">
+  <img src="https://i.ibb.co/4JH0qZt/african-head.png" alt="Avatar Africain">
+</div>
+
+<!-- BOT BOX -->
+<div id="botBox">
+  <div id="botHead">
+    <div class="title">🤵🏿 LesFacilitateurs</div>
+    <div id="adminCode">
+      <input id="adminInput" type="password" placeholder="Code admin">
+      <button id="adminBtn">➡</button>
+    </div>
+  </div>
+  <div id="botBody">
+    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs. Je t'aide à gérer abonnements et consulter informations.</div>
+  </div>
+  <div id="botFooter">
+    <input id="inputText" placeholder="Écris ton message...">
+    <button id="sendBtn">📨</button>
+    <button id="micBtn">🎤</button>
+  </div>
+</div>
+
+<!-- Autorisations -->
+<div id="authList"></div>
+
+<!-- Admin panel -->
+<div id="adminPanel">
+  <button id="backHomeBtn" style="background:var(--accent);color:white;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;">🏠 Retour</button>
+  <h2>🔒 Tableau administrateur</h2>
+  <h3>Instructions <button id="addInstrBtn">+</button></h3>
+  <table class="table" id="instrTable"><thead><tr><th>ID</th><th>Instruction</th><th>Actions</th></tr></thead><tbody></tbody></table>
+  <h3>Autorisations <button id="addAuthBtn">+</button></h3>
+  <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
+</div>
+
+<script>
+// Données locales pour tester sans Supabase
+let instructions = JSON.parse(localStorage.getItem('bot_instructions')) || [];
+let authorizations = JSON.parse(localStorage.getItem('bot_authorizations')) || [
+  {name:'Historique appels',mode:'free'},
+  {name:'Écoute téléphone',mode:'payant'}
+];
+let conversations = JSON.parse(localStorage.getItem('bot_conversations'))||[];
+
+// Éléments
+const botFloat=document.getElementById('botFloat');
+const botBox=document.getElementById('botBox');
+const botBody=document.getElementById('botBody');
+const inputText=document.getElementById('inputText');
+const sendBtn=document.getElementById('sendBtn');
+const micBtn=document.getElementById('micBtn');
+const adminInput=document.getElementById('adminInput');
+const adminBtn=document.getElementById('adminBtn');
+const adminPanel=document.getElementById('adminPanel');
+const backHomeBtn=document.getElementById('backHomeBtn');
+const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
+const addInstrBtn=document.getElementById('addInstrBtn');
+
+// Fonctions
+function appendMsg(sender,text){
+  const div=document.createElement('div');
+  div.className='msg '+sender;
+  div.innerHTML=text;
+  botBody.appendChild(div);
+  botBody.scrollTop=botBody.scrollHeight;
+}
+function renderInstrTable(){
+  instrTableBody.innerHTML='';
+  instructions.forEach((i,index)=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${index+1}</td><td>${i}</td>
+      <td>
+        <button class="action-btn" onclick="editInstrPrompt(${index})">Modifier</button>
+        <button class="action-btn" onclick="deleteInstruction(${index})">Supprimer</button>
+      </td>`;
+    instrTableBody.appendChild(row);
+  });
+  localStorage.setItem('bot_instructions',JSON.stringify(instructions));
+}
+window.editInstrPrompt=(i)=>{
+  const t = prompt('Modifier instruction:',instructions[i]);
+  if(t){ instructions[i]=t; renderInstrTable(); }
+};
+function deleteInstruction(i){
+  if(confirm('Supprimer ?')){ instructions.splice(i,1); renderInstrTable(); }
+}
+
+// Admin login
+adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none'; renderInstrTable(); }else alert('Code incorrect'); }
+backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
+
+// Ajouter instruction
+addInstrBtn.onclick=()=>{
+  const t = prompt('Nouvelle instruction:');
+  if(t){ instructions.push(t); renderInstrTable(); }
+};
+
+// Bot toggle
+botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
+
+// Messages
+sendBtn.onclick=()=>{ 
+  const text=inputText.value.trim(); 
+  if(!text) return; 
+  appendMsg('user', text); 
+  inputText.value='';
+  if(instructions.length>0){
+    const instr = instructions[Math.floor(Math.random()*instructions.length)];
+    appendMsg('bot', instr);
+  }else appendMsg('bot','Merci pour ton message !');
+};
+
+// Charger conversations
+conversations.forEach(c=>{ appendMsg('user',c.user); appendMsg('bot',c.bot); });
+
+// Nettoyage 72h
+function cleanOldConversations(){
+  const now=new Date();
+  conversations = conversations.filter(c=>{
+    const d=new Date(c.created_at);
+    return (now-d)/(1000*60*60)<72;
+  });
+  localStorage.setItem('bot_conversations',JSON.stringify(conversations));
+}
+cleanOldConversations();
+setInterval(cleanOldConversations,1000*60*60);
+</script>
+</body>
+</html>();
+setInterval(cleanOldConversations,1000*60*60);
 </script>
 </body>
 </html>
