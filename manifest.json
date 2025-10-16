@@ -1,0 +1,21 @@
+{
+  "name": "LesFacilitateurs",
+  "short_name": "Facilitateurs",
+  "description": "Bot de gestion et assistant",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/4JH0qZt/african-head.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/4JH0qZt/african-head.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
