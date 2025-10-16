@@ -77,12 +77,15 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
 </div>
 
-<!-- Supabase JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-<script>
-const SUPABASE_URL = 'https://ycotvgvevyfyqflicmtw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+let instructions = [];
+let authorizations = [];
+let conversations = [];
 
 // --- Éléments ---
 const botFloat=document.getElementById('botFloat');
@@ -101,68 +104,7 @@ const authTableBody=document.getElementById('authTable').querySelector('tbody');
 const addInstrBtn=document.getElementById('addInstrBtn');
 const addAuthBtn=document.getElementById('addAuthBtn');
 
-let instructions = [];
-let authorizations = [];
-let conversations = [];
-
-// --- Fonctions ---
-async function loadData(){
-  const { data: instrs } = await supabase.from('bot_instructions').select('*').order('id');
-  const { data: auths } = await supabase.from('authorizations').select('*').order('id');
-  const { data: convs } = await supabase.from('conversations').select('*').order('created_at');
-
-  instructions = instrs || [];
-  authorizations = auths || [];
-  conversations = convs || [];
-
-  renderInstrTable();
-  renderAuthTable();
-  loadConversations();
-  renderBotAuthList();
-}
-
-function renderInstrTable(){
-  instrTableBody.innerHTML='';
-  instructions.forEach(i=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`<td>${i.id}</td><td>${i.text}</td>
-      <td><button class="action-btn" onclick="editInstr(${i.id})">Modifier</button>
-      <button class="action-btn" onclick="deleteInstr(${i.id})">Supprimer</button></td>`;
-    instrTableBody.appendChild(row);
-  });
-}
-
-function renderAuthTable(){
-  authTableBody.innerHTML='';
-  authorizations.forEach(a=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`<td>${a.id}</td><td>${a.name}</td><td>${a.mode}</td>
-      <td><button class="action-btn" onclick="editAuth(${a.id})">Modifier</button>
-      <button class="action-btn" onclick="deleteAuth(${a.id})">Supprimer</button></td>`;
-    authTableBody.appendChild(row);
-  });
-}
-
-function renderBotAuthList(){
-  authListDiv.innerHTML='';
-  authorizations.forEach(a=>{
-    const btn=document.createElement('button');
-    btn.textContent=a.name+(a.mode==='payant'?' 💰':'');
-    btn.style.display='block';
-    btn.style.width='100%';
-    btn.style.marginBottom='4px';
-    btn.style.padding='6px';
-    btn.style.borderRadius='6px';
-    btn.style.border='none';
-    btn.style.cursor='pointer';
-    btn.style.background='#2563eb';
-    btn.style.color='white';
-    btn.onclick=()=>{ appendMsg('bot',`✅ Informations: <b>${a.name}</b>`);};
-    authListDiv.appendChild(btn);
-  });
-}
-
-// --- Bot ---
+// --- Utilitaires ---
 function appendMsg(sender,text){
   const div=document.createElement('div');
   div.className='msg '+sender;
@@ -170,33 +112,92 @@ function appendMsg(sender,text){
   botBody.appendChild(div);
   botBody.scrollTop=botBody.scrollHeight;
 }
-function loadConversations(){ conversations.forEach(c=>{appendMsg('user',c.user);appendMsg('bot',c.bot);});}
-async function saveConversation(user,bot){
-  await supabase.from('conversations').insert([{user,bot}]);
-  appendMsg('bot',bot);
+async function loadInstructions(){
+  const { data, error } = await supabase.from('bot_instructions').select('*');
+  if(error) { console.error(error); return; }
+  instructions = data;
+  renderInstrTable();
 }
-sendBtn.onclick=()=>{ const text=inputText.value.trim(); if(!text) return; handleBotMessage(text); inputText.value=''; }
-function handleBotMessage(userText){ appendMsg('user',userText); const instr = instructions[Math.floor(Math.random()*instructions.length)]; setTimeout(()=>{ saveConversation(userText,instr.text); },500); }
+async function addInstruction(text){
+  const { data, error } = await supabase.from('bot_instructions').insert([{instruction:text}]).select();
+  if(error) { alert('Erreur: '+error.message); return; }
+  instructions.push(data[0]);
+  renderInstrTable();
+}
+async function editInstruction(id,newText){
+  const { data, error } = await supabase.from('bot_instructions').update({instruction:newText}).eq('id',id).select();
+  if(error){ alert(error.message); return; }
+  await loadInstructions();
+}
+async function deleteInstruction(id){
+  if(!confirm('Supprimer ?')) return;
+  const { error } = await supabase.from('bot_instructions').delete().eq('id',id);
+  if(error){ alert(error.message); return; }
+  await loadInstructions();
+}
 
-// --- Admin actions ---
-addInstrBtn.onclick=async()=>{ const t=prompt('Nouvelle instruction:'); if(t){await supabase.from('bot_instructions').insert([{text:t}]); await loadData();}}
-addAuthBtn.onclick=async()=>{ const n=prompt('Nom autorisation:'); if(!n) return; const m=prompt('Mode (free/payant)','free'); await supabase.from('authorizations').insert([{name:n,mode:m}]); await loadData();}
+function renderInstrTable(){
+  instrTableBody.innerHTML='';
+  instructions.forEach((i,index)=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${i.id}</td><td>${i.instruction}</td>
+      <td>
+        <button class="action-btn" onclick="editInstrPrompt(${i.id},'${i.instruction.replace(/'/g,"\\'")}')">Modifier</button>
+        <button class="action-btn" onclick="deleteInstruction(${i.id})">Supprimer</button>
+      </td>`;
+    instrTableBody.appendChild(row);
+  });
+}
 
-window.editInstr=async(id)=>{ const t=prompt('Modifier instruction:'); if(t) await supabase.from('bot_instructions').update({text:t}).eq('id',id); await loadData();}
-window.deleteInstr=async(id)=>{ if(confirm('Supprimer ?')) await supabase.from('bot_instructions').delete().eq('id',id); await loadData();}
-window.editAuth=async(id)=>{ const n=prompt('Nom autorisation:'); if(!n) return; const m=prompt('Mode (free/payant)','free'); await supabase.from('authorizations').update({name:n,mode:m}).eq('id',id); await loadData();}
-window.deleteAuth=async(id)=>{ if(confirm('Supprimer ?')) await supabase.from('authorizations').delete().eq('id',id); await loadData();}
+// --- Hooks pour edit prompt ---
+window.editInstrPrompt = async (id,oldText)=>{
+  const t = prompt('Modifier instruction:',oldText);
+  if(t) await editInstruction(id,t);
+};
 
 // --- Admin login ---
-adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none'; loadData();} else alert('Code incorrect'); }
+adminBtn.onclick=()=>{
+  if(adminInput.value==='233233'){
+    adminPanel.style.display='block';
+    botBox.style.display='none';
+    loadInstructions();
+  }else alert('Code incorrect');
+};
+backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
+
+// --- Ajouter instruction ---
+addInstrBtn.onclick=async ()=>{
+  const text = prompt('Nouvelle instruction:');
+  if(!text) return;
+  await addInstruction(text);
+};
 
 // --- Bot toggle ---
 botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
 
-// --- Autorisations toggle ---
-botFloat.addEventListener('contextmenu',e=>{ e.preventDefault(); authListDiv.style.display=authListDiv.style.display==='block'?'none':'block'; });
+// --- Messages ---
+sendBtn.onclick=()=>{ 
+  const text=inputText.value.trim(); 
+  if(!text) return; 
+  appendMsg('user', text); 
+  inputText.value=''; 
+  if(instructions.length>0){
+    const instr = instructions[Math.floor(Math.random()*instructions.length)];
+    appendMsg('bot', instr.instruction);
+  }else appendMsg('bot','Merci pour ton message !');
+};
 
-loadData();
+// --- Nettoyage automatique des messages après 72h ---
+function cleanOldConversations(){
+  const now = new Date();
+  conversations = conversations.filter(c=>{
+    const d = new Date(c.created_at);
+    return (now-d)/(1000*60*60)<72;
+  });
+  localStorage.setItem('bot_conversations',JSON.stringify(conversations));
+}
+cleanOldConversations();
+setInterval(cleanOldConversations,1000*60*60);
 </script>
 </body>
 </html>
