@@ -77,14 +77,12 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
 </div>
 
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <script>
-// --- Données ---
-let instructions = JSON.parse(localStorage.getItem('bot_instructions')) || [{text:'Répondre poliment et conseiller selon le besoin'}];
-let authorizations = JSON.parse(localStorage.getItem('bot_authorizations')) || [
-  {name:'Historique appels',mode:'free'},
-  {name:'Écoute téléphone',mode:'payant'}
-];
-let conversations = JSON.parse(localStorage.getItem('bot_conversations'))||[];
+const SUPABASE_URL = 'https://ycotvgvevyfyqflicmtw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- Éléments ---
 const botFloat=document.getElementById('botFloat');
@@ -103,42 +101,48 @@ const authTableBody=document.getElementById('authTable').querySelector('tbody');
 const addInstrBtn=document.getElementById('addInstrBtn');
 const addAuthBtn=document.getElementById('addAuthBtn');
 
-// --- Utilitaires ---
-function saveData(){ 
-  localStorage.setItem('bot_instructions',JSON.stringify(instructions));
-  localStorage.setItem('bot_authorizations',JSON.stringify(authorizations));
-}
-function appendMsg(sender,text){
-  const div=document.createElement('div');
-  div.className='msg '+sender;
-  div.innerHTML=text;
-  botBody.appendChild(div);
-  botBody.scrollTop=botBody.scrollHeight;
+let instructions = [];
+let authorizations = [];
+let conversations = [];
+
+// --- Fonctions ---
+async function loadData(){
+  const { data: instrs } = await supabase.from('bot_instructions').select('*').order('id');
+  const { data: auths } = await supabase.from('authorizations').select('*').order('id');
+  const { data: convs } = await supabase.from('conversations').select('*').order('created_at');
+
+  instructions = instrs || [];
+  authorizations = auths || [];
+  conversations = convs || [];
+
+  renderInstrTable();
+  renderAuthTable();
+  loadConversations();
+  renderBotAuthList();
 }
 
-// --- Render ---
-function renderInstrTable(){ 
+function renderInstrTable(){
   instrTableBody.innerHTML='';
-  instructions.forEach((i,index)=>{
+  instructions.forEach(i=>{
     const row=document.createElement('tr');
-    row.innerHTML=`<td>${index+1}</td><td>${i.text}</td>
-      <td><button class="action-btn" onclick="editInstr(${index})">Modifier</button>
-      <button class="action-btn" onclick="deleteInstr(${index})">Supprimer</button></td>`;
+    row.innerHTML=`<td>${i.id}</td><td>${i.text}</td>
+      <td><button class="action-btn" onclick="editInstr(${i.id})">Modifier</button>
+      <button class="action-btn" onclick="deleteInstr(${i.id})">Supprimer</button></td>`;
     instrTableBody.appendChild(row);
   });
-  saveData();
 }
+
 function renderAuthTable(){
   authTableBody.innerHTML='';
-  authorizations.forEach((a,index)=>{
+  authorizations.forEach(a=>{
     const row=document.createElement('tr');
-    row.innerHTML=`<td>${index+1}</td><td>${a.name}</td><td>${a.mode}</td>
-      <td><button class="action-btn" onclick="editAuth(${index})">Modifier</button>
-      <button class="action-btn" onclick="deleteAuth(${index})">Supprimer</button></td>`;
+    row.innerHTML=`<td>${a.id}</td><td>${a.name}</td><td>${a.mode}</td>
+      <td><button class="action-btn" onclick="editAuth(${a.id})">Modifier</button>
+      <button class="action-btn" onclick="deleteAuth(${a.id})">Supprimer</button></td>`;
     authTableBody.appendChild(row);
   });
-  saveData();
 }
+
 function renderBotAuthList(){
   authListDiv.innerHTML='';
   authorizations.forEach(a=>{
@@ -158,49 +162,41 @@ function renderBotAuthList(){
   });
 }
 
+// --- Bot ---
+function appendMsg(sender,text){
+  const div=document.createElement('div');
+  div.className='msg '+sender;
+  div.innerHTML=text;
+  botBody.appendChild(div);
+  botBody.scrollTop=botBody.scrollHeight;
+}
+function loadConversations(){ conversations.forEach(c=>{appendMsg('user',c.user);appendMsg('bot',c.bot);});}
+async function saveConversation(user,bot){
+  await supabase.from('conversations').insert([{user,bot}]);
+  appendMsg('bot',bot);
+}
+sendBtn.onclick=()=>{ const text=inputText.value.trim(); if(!text) return; handleBotMessage(text); inputText.value=''; }
+function handleBotMessage(userText){ appendMsg('user',userText); const instr = instructions[Math.floor(Math.random()*instructions.length)]; setTimeout(()=>{ saveConversation(userText,instr.text); },500); }
+
 // --- Admin actions ---
-addInstrBtn.onclick=()=>{ const text=prompt('Nouvelle instruction:'); if(text){instructions.push({text}); renderInstrTable();} }
-addAuthBtn.onclick=()=>{ const name=prompt('Nom autorisation:'); if(!name) return; const mode=prompt('Mode (free/payant)','free'); authorizations.push({name,mode}); renderAuthTable(); renderBotAuthList();}
-backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
+addInstrBtn.onclick=async()=>{ const t=prompt('Nouvelle instruction:'); if(t){await supabase.from('bot_instructions').insert([{text:t}]); await loadData();}}
+addAuthBtn.onclick=async()=>{ const n=prompt('Nom autorisation:'); if(!n) return; const m=prompt('Mode (free/payant)','free'); await supabase.from('authorizations').insert([{name:n,mode:m}]); await loadData();}
+
+window.editInstr=async(id)=>{ const t=prompt('Modifier instruction:'); if(t) await supabase.from('bot_instructions').update({text:t}).eq('id',id); await loadData();}
+window.deleteInstr=async(id)=>{ if(confirm('Supprimer ?')) await supabase.from('bot_instructions').delete().eq('id',id); await loadData();}
+window.editAuth=async(id)=>{ const n=prompt('Nom autorisation:'); if(!n) return; const m=prompt('Mode (free/payant)','free'); await supabase.from('authorizations').update({name:n,mode:m}).eq('id',id); await loadData();}
+window.deleteAuth=async(id)=>{ if(confirm('Supprimer ?')) await supabase.from('authorizations').delete().eq('id',id); await loadData();}
+
+// --- Admin login ---
+adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none'; loadData();} else alert('Code incorrect'); }
 
 // --- Bot toggle ---
 botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
 
-// --- Admin login ---
-adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none';renderInstrTable();renderAuthTable();renderBotAuthList();}else alert('Code incorrect'); }
-
-// --- Messages ---
-sendBtn.onclick=()=>{ const text=inputText.value.trim(); if(!text) return; handleBotMessage(text); inputText.value=''; }
-function handleBotMessage(userText){ appendMsg('user',userText); const instr = instructions[Math.floor(Math.random()*instructions.length)]; setTimeout(()=>{ appendMsg('bot',instr.text); saveConversation(userText,instr.text); },500); }
-
-// --- Conversations ---
-function saveConversation(user,bot){ conversations.push({user,bot,created_at:new Date().toISOString()}); localStorage.setItem('bot_conversations',JSON.stringify(conversations)); }
-function loadConversations(){ conversations.forEach(c=>{appendMsg('user',c.user);appendMsg('bot',c.bot);}); }
-loadConversations();
-
 // --- Autorisations toggle ---
 botFloat.addEventListener('contextmenu',e=>{ e.preventDefault(); authListDiv.style.display=authListDiv.style.display==='block'?'none':'block'; });
 
-// --- Edit/Delete ---
-window.editInstr=(i)=>{ const t=prompt('Modifier instruction:',instructions[i].text); if(t){instructions[i].text=t; renderInstrTable();} }
-window.deleteInstr=(i)=>{ if(confirm('Supprimer ?')){instructions.splice(i,1); renderInstrTable();} }
-window.editAuth=(i)=>{ const n=prompt('Modifier autorisation:',authorizations[i].name); if(!n) return; const m=prompt('Mode (free/payant)',authorizations[i].mode); authorizations[i].name=n; authorizations[i].mode=m; renderAuthTable(); renderBotAuthList();}
-window.deleteAuth=(i)=>{ if(confirm('Supprimer ?')){authorizations.splice(i,1); renderAuthTable(); renderBotAuthList();} }
-
-// --- Persistance ---
-renderInstrTable();
-renderAuthTable();
-renderBotAuthList();
-</script>
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker enregistré avec succès:', reg.scope))
-      .catch(err => console.log('Erreur Service Worker:', err));
-  });
-}
+loadData();
 </script>
 </body>
 </html>
