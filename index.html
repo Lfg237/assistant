@@ -77,34 +77,31 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
 </div>
 
+<!-- Supabase classique -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
 <script>
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = supabase.createClient(
+  'https://ycotvgvevyfyqflicmtw.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ'
+);
 
 let instructions = [];
-let authorizations = [];
 let conversations = [];
 
-// --- Éléments ---
+// Éléments
 const botFloat=document.getElementById('botFloat');
 const botBox=document.getElementById('botBox');
 const botBody=document.getElementById('botBody');
 const inputText=document.getElementById('inputText');
 const sendBtn=document.getElementById('sendBtn');
-const micBtn=document.getElementById('micBtn');
-const authListDiv=document.getElementById('authList');
 const adminInput=document.getElementById('adminInput');
 const adminBtn=document.getElementById('adminBtn');
 const adminPanel=document.getElementById('adminPanel');
 const backHomeBtn=document.getElementById('backHomeBtn');
 const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
-const authTableBody=document.getElementById('authTable').querySelector('tbody');
 const addInstrBtn=document.getElementById('addInstrBtn');
-const addAuthBtn=document.getElementById('addAuthBtn');
 
-// --- Utilitaires ---
+// Utilitaires
 function appendMsg(sender,text){
   const div=document.createElement('div');
   div.className='msg '+sender;
@@ -112,6 +109,8 @@ function appendMsg(sender,text){
   botBody.appendChild(div);
   botBody.scrollTop=botBody.scrollHeight;
 }
+
+// --- Supabase CRUD Instructions ---
 async function loadInstructions(){
   const { data, error } = await supabase.from('bot_instructions').select('*');
   if(error) { console.error(error); return; }
@@ -138,7 +137,7 @@ async function deleteInstruction(id){
 
 function renderInstrTable(){
   instrTableBody.innerHTML='';
-  instructions.forEach((i,index)=>{
+  instructions.forEach(i=>{
     const row=document.createElement('tr');
     row.innerHTML=`<td>${i.id}</td><td>${i.instruction}</td>
       <td>
@@ -149,7 +148,7 @@ function renderInstrTable(){
   });
 }
 
-// --- Hooks pour edit prompt ---
+// --- Hook edit prompt ---
 window.editInstrPrompt = async (id,oldText)=>{
   const t = prompt('Modifier instruction:',oldText);
   if(t) await editInstruction(id,t);
@@ -165,17 +164,17 @@ adminBtn.onclick=()=>{
 };
 backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
 
-// --- Ajouter instruction ---
+// Ajouter instruction
 addInstrBtn.onclick=async ()=>{
   const text = prompt('Nouvelle instruction:');
   if(!text) return;
   await addInstruction(text);
 };
 
-// --- Bot toggle ---
+// Bot toggle
 botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
 
-// --- Messages ---
+// Messages
 sendBtn.onclick=()=>{ 
   const text=inputText.value.trim(); 
   if(!text) return; 
@@ -184,10 +183,12 @@ sendBtn.onclick=()=>{
   if(instructions.length>0){
     const instr = instructions[Math.floor(Math.random()*instructions.length)];
     appendMsg('bot', instr.instruction);
+    conversations.push({user:text,bot:instr.instruction,created_at:new Date().toISOString()});
+    localStorage.setItem('bot_conversations',JSON.stringify(conversations));
   }else appendMsg('bot','Merci pour ton message !');
 };
 
-// --- Nettoyage automatique des messages après 72h ---
+// Nettoyage automatique 72h
 function cleanOldConversations(){
   const now = new Date();
   conversations = conversations.filter(c=>{
@@ -196,6 +197,8 @@ function cleanOldConversations(){
   });
   localStorage.setItem('bot_conversations',JSON.stringify(conversations));
 }
+conversations = JSON.parse(localStorage.getItem('bot_conversations')||'[]');
+loadInstructions();
 cleanOldConversations();
 setInterval(cleanOldConversations,1000*60*60);
 </script>
