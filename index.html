@@ -77,127 +77,113 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
 </div>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-const supabase = createClient(supabaseUrl, supabaseKey);
+<script>
+async function startBot() {
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+  const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-let instructions = [];
-let authorizations = [];
-let conversations = [];
+  let instructions = [];
 
-// --- Éléments ---
-const botFloat=document.getElementById('botFloat');
-const botBox=document.getElementById('botBox');
-const botBody=document.getElementById('botBody');
-const inputText=document.getElementById('inputText');
-const sendBtn=document.getElementById('sendBtn');
-const micBtn=document.getElementById('micBtn');
-const authListDiv=document.getElementById('authList');
-const adminInput=document.getElementById('adminInput');
-const adminBtn=document.getElementById('adminBtn');
-const adminPanel=document.getElementById('adminPanel');
-const backHomeBtn=document.getElementById('backHomeBtn');
-const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
-const authTableBody=document.getElementById('authTable').querySelector('tbody');
-const addInstrBtn=document.getElementById('addInstrBtn');
-const addAuthBtn=document.getElementById('addAuthBtn');
+  const botFloat=document.getElementById('botFloat');
+  const botBox=document.getElementById('botBox');
+  const botBody=document.getElementById('botBody');
+  const inputText=document.getElementById('inputText');
+  const sendBtn=document.getElementById('sendBtn');
+  const adminInput=document.getElementById('adminInput');
+  const adminBtn=document.getElementById('adminBtn');
+  const adminPanel=document.getElementById('adminPanel');
+  const backHomeBtn=document.getElementById('backHomeBtn');
+  const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
+  const addInstrBtn=document.getElementById('addInstrBtn');
 
-// --- Utilitaires ---
-function appendMsg(sender,text){
-  const div=document.createElement('div');
-  div.className='msg '+sender;
-  div.innerHTML=text;
-  botBody.appendChild(div);
-  botBody.scrollTop=botBody.scrollHeight;
+  function appendMsg(sender,text){
+    const div=document.createElement('div');
+    div.className='msg '+sender;
+    div.innerHTML=text;
+    botBody.appendChild(div);
+    botBody.scrollTop=botBody.scrollHeight;
+  }
+
+  async function loadInstructions(){
+    const { data, error } = await supabase.from('bot_instructions').select('*');
+    if(error) { console.error(error); return; }
+    instructions = data;
+    renderInstrTable();
+  }
+
+  async function addInstruction(text){
+    const { data, error } = await supabase.from('bot_instructions').insert([{instruction:text}]).select();
+    if(error) { alert('Erreur: '+error.message); return; }
+    instructions.push(data[0]);
+    renderInstrTable();
+  }
+
+  async function editInstruction(id,newText){
+    const { data, error } = await supabase.from('bot_instructions').update({instruction:newText}).eq('id',id).select();
+    if(error){ alert(error.message); return; }
+    await loadInstructions();
+  }
+
+  async function deleteInstruction(id){
+    if(!confirm('Supprimer ?')) return;
+    const { error } = await supabase.from('bot_instructions').delete().eq('id',id);
+    if(error){ alert(error.message); return; }
+    await loadInstructions();
+  }
+
+  function renderInstrTable(){
+    instrTableBody.innerHTML='';
+    instructions.forEach((i)=>{
+      const row=document.createElement('tr');
+      row.innerHTML=`<td>${i.id}</td><td>${i.instruction}</td>
+        <td>
+          <button class="action-btn" onclick="editInstrPrompt(${i.id},'${i.instruction.replace(/'/g,"\\'")}')">Modifier</button>
+          <button class="action-btn" onclick="deleteInstruction(${i.id})">Supprimer</button>
+        </td>`;
+      instrTableBody.appendChild(row);
+    });
+  }
+
+  window.editInstrPrompt = async (id,oldText)=>{
+    const t = prompt('Modifier instruction:',oldText);
+    if(t) await editInstruction(id,t);
+  };
+
+  // --- Admin login ---
+  adminBtn.onclick = ()=>{
+    if(adminInput.value==='233233'){
+      adminPanel.style.display='block';
+      botBox.style.display='none';
+      loadInstructions();
+    } else alert('Code incorrect');
+  };
+
+  backHomeBtn.onclick = ()=>{adminPanel.style.display='none'; botBox.style.display='flex';};
+
+  addInstrBtn.onclick = async ()=>{
+    const text = prompt('Nouvelle instruction:');
+    if(!text) return;
+    await addInstruction(text);
+  };
+
+  botFloat.onclick = ()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';};
+
+  sendBtn.onclick = ()=>{ 
+    const text=inputText.value.trim(); 
+    if(!text) return; 
+    appendMsg('user', text); 
+    inputText.value='';
+    if(instructions.length>0){
+      const instr = instructions[Math.floor(Math.random()*instructions.length)];
+      appendMsg('bot', instr.instruction);
+    } else appendMsg('bot','Merci pour ton message !');
+  };
 }
-async function loadInstructions(){
-  const { data, error } = await supabase.from('bot_instructions').select('*');
-  if(error) { console.error(error); return; }
-  instructions = data;
-  renderInstrTable();
-}
-async function addInstruction(text){
-  const { data, error } = await supabase.from('bot_instructions').insert([{instruction:text}]).select();
-  if(error) { alert('Erreur: '+error.message); return; }
-  instructions.push(data[0]);
-  renderInstrTable();
-}
-async function editInstruction(id,newText){
-  const { data, error } = await supabase.from('bot_instructions').update({instruction:newText}).eq('id',id).select();
-  if(error){ alert(error.message); return; }
-  await loadInstructions();
-}
-async function deleteInstruction(id){
-  if(!confirm('Supprimer ?')) return;
-  const { error } = await supabase.from('bot_instructions').delete().eq('id',id);
-  if(error){ alert(error.message); return; }
-  await loadInstructions();
-}
 
-function renderInstrTable(){
-  instrTableBody.innerHTML='';
-  instructions.forEach((i,index)=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`<td>${i.id}</td><td>${i.instruction}</td>
-      <td>
-        <button class="action-btn" onclick="editInstrPrompt(${i.id},'${i.instruction.replace(/'/g,"\\'")}')">Modifier</button>
-        <button class="action-btn" onclick="deleteInstruction(${i.id})">Supprimer</button>
-      </td>`;
-    instrTableBody.appendChild(row);
-  });
-}
-
-// --- Hooks pour edit prompt ---
-window.editInstrPrompt = async (id,oldText)=>{
-  const t = prompt('Modifier instruction:',oldText);
-  if(t) await editInstruction(id,t);
-};
-
-// --- Admin login ---
-adminBtn.onclick=()=>{
-  if(adminInput.value==='233233'){
-    adminPanel.style.display='block';
-    botBox.style.display='none';
-    loadInstructions();
-  }else alert('Code incorrect');
-};
-backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
-
-// --- Ajouter instruction ---
-addInstrBtn.onclick=async ()=>{
-  const text = prompt('Nouvelle instruction:');
-  if(!text) return;
-  await addInstruction(text);
-};
-
-// --- Bot toggle ---
-botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
-
-// --- Messages ---
-sendBtn.onclick=()=>{ 
-  const text=inputText.value.trim(); 
-  if(!text) return; 
-  appendMsg('user', text); 
-  inputText.value=''; 
-  if(instructions.length>0){
-    const instr = instructions[Math.floor(Math.random()*instructions.length)];
-    appendMsg('bot', instr.instruction);
-  }else appendMsg('bot','Merci pour ton message !');
-};
-
-// --- Nettoyage automatique des messages après 72h ---
-function cleanOldConversations(){
-  const now = new Date();
-  conversations = conversations.filter(c=>{
-    const d = new Date(c.created_at);
-    return (now-d)/(1000*60*60)<72;
-  });
-  localStorage.setItem('bot_conversations',JSON.stringify(conversations));
-}
-cleanOldConversations();
-setInterval(cleanOldConversations,1000*60*60);
+startBot();
 </script>
+
 </body>
 </html>
