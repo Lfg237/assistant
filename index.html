@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bot LesFacilitateurs</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LesFacilitateurs</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="https://i.ibb.co/4JH0qZt/african-head.png" type="image/png">
 <style>
 :root{
   --bg: #0b1220;
@@ -12,15 +15,9 @@
   --text:#e6eef8;
 }
 body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);}
-#botFloat{
-  position:fixed;left:20px;bottom:20px;width:72px;height:72px;border-radius:50%;
-  background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;
-}
+#botFloat{position:fixed;left:20px;bottom:20px;width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;}
 #botFloat img{width:60%;height:60%;border-radius:50%;}
-#botBox{
-  position:fixed;left:20px;bottom:110px;width:350px;max-height:80vh;background:var(--card);
-  border-radius:12px;display:none;flex-direction:column;overflow:hidden;z-index:1000;backdrop-filter:blur(6px);
-}
+#botBox{position:fixed;left:20px;bottom:110px;width:350px;max-height:80vh;background:var(--card);border-radius:12px;display:none;flex-direction:column;overflow:hidden;z-index:1000;backdrop-filter:blur(6px);}
 #botHead{padding:10px;background:var(--accent);color:white;display:flex;align-items:center;gap:8px;}
 #botHead .title{font-weight:700;flex:1;}
 #adminCode input{background: rgba(255,255,255,0.08);border:none;padding:6px 8px;border-radius:6px;color:white;outline:none;width:120px;}
@@ -80,10 +77,10 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(
   <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
 </div>
 
-<script >
+<script>
 // --- Données ---
-let instructions = [{text:'Répondre poliment et conseiller selon le besoin'}];
-let authorizations = [
+let instructions = JSON.parse(localStorage.getItem('bot_instructions')) || [{text:'Répondre poliment et conseiller selon le besoin'}];
+let authorizations = JSON.parse(localStorage.getItem('bot_authorizations')) || [
   {name:'Historique appels',mode:'free'},
   {name:'Écoute téléphone',mode:'payant'}
 ];
@@ -106,7 +103,11 @@ const authTableBody=document.getElementById('authTable').querySelector('tbody');
 const addInstrBtn=document.getElementById('addInstrBtn');
 const addAuthBtn=document.getElementById('addAuthBtn');
 
-// --- Fonctions utilitaires ---
+// --- Utilitaires ---
+function saveData(){ 
+  localStorage.setItem('bot_instructions',JSON.stringify(instructions));
+  localStorage.setItem('bot_authorizations',JSON.stringify(authorizations));
+}
 function appendMsg(sender,text){
   const div=document.createElement('div');
   div.className='msg '+sender;
@@ -115,7 +116,8 @@ function appendMsg(sender,text){
   botBody.scrollTop=botBody.scrollHeight;
 }
 
-function renderInstrTable(){
+// --- Render ---
+function renderInstrTable(){ 
   instrTableBody.innerHTML='';
   instructions.forEach((i,index)=>{
     const row=document.createElement('tr');
@@ -124,8 +126,8 @@ function renderInstrTable(){
       <button class="action-btn" onclick="deleteInstr(${index})">Supprimer</button></td>`;
     instrTableBody.appendChild(row);
   });
+  saveData();
 }
-
 function renderAuthTable(){
   authTableBody.innerHTML='';
   authorizations.forEach((a,index)=>{
@@ -135,16 +137,22 @@ function renderAuthTable(){
       <button class="action-btn" onclick="deleteAuth(${index})">Supprimer</button></td>`;
     authTableBody.appendChild(row);
   });
+  saveData();
 }
-
 function renderBotAuthList(){
   authListDiv.innerHTML='';
   authorizations.forEach(a=>{
     const btn=document.createElement('button');
     btn.textContent=a.name+(a.mode==='payant'?' 💰':'');
-    btn.style.display='block';btn.style.width='100%';btn.style.marginBottom='4px';btn.style.padding='6px';
-    btn.style.borderRadius='6px';btn.style.border='none';btn.style.cursor='pointer';
-    btn.style.background='#2563eb';btn.style.color='white';
+    btn.style.display='block';
+    btn.style.width='100%';
+    btn.style.marginBottom='4px';
+    btn.style.padding='6px';
+    btn.style.borderRadius='6px';
+    btn.style.border='none';
+    btn.style.cursor='pointer';
+    btn.style.background='#2563eb';
+    btn.style.color='white';
     btn.onclick=()=>{ appendMsg('bot',`✅ Informations: <b>${a.name}</b>`);};
     authListDiv.appendChild(btn);
   });
@@ -155,33 +163,20 @@ addInstrBtn.onclick=()=>{ const text=prompt('Nouvelle instruction:'); if(text){i
 addAuthBtn.onclick=()=>{ const name=prompt('Nom autorisation:'); if(!name) return; const mode=prompt('Mode (free/payant)','free'); authorizations.push({name,mode}); renderAuthTable(); renderBotAuthList();}
 backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
 
-// --- Bot float click ---
+// --- Bot toggle ---
 botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
 
 // --- Admin login ---
 adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none';renderInstrTable();renderAuthTable();renderBotAuthList();}else alert('Code incorrect'); }
 
-// --- Send message ---
+// --- Messages ---
 sendBtn.onclick=()=>{ const text=inputText.value.trim(); if(!text) return; handleBotMessage(text); inputText.value=''; }
+function handleBotMessage(userText){ appendMsg('user',userText); const instr = instructions[Math.floor(Math.random()*instructions.length)]; setTimeout(()=>{ appendMsg('bot',instr.text); saveConversation(userText,instr.text); },500); }
 
-// --- Handle message ---
-function handleBotMessage(userText){
-  appendMsg('user',userText);
-  const instr = instructions[Math.floor(Math.random()*instructions.length)];
-  setTimeout(()=>{ appendMsg('bot',instr.text); saveConversation(userText,instr.text); },500);
-}
-
-// --- Conversation hibride ---
-function saveConversation(user,bot){
-  const timestamp=new Date().toISOString();
-  conversations.push({user,bot,created_at:timestamp});
-  localStorage.setItem('bot_conversations',JSON.stringify(conversations));
-}
+// --- Conversations ---
+function saveConversation(user,bot){ conversations.push({user,bot,created_at:new Date().toISOString()}); localStorage.setItem('bot_conversations',JSON.stringify(conversations)); }
 function loadConversations(){ conversations.forEach(c=>{appendMsg('user',c.user);appendMsg('bot',c.bot);}); }
-function deleteOldMessages(){ const now=Date.now(); conversations=conversations.filter(m=>now-new Date(m.created_at).getTime()<7*24*60*60*1000); localStorage.setItem('bot_conversations',JSON.stringify(conversations)); }
 loadConversations();
-deleteOldMessages();
-setInterval(deleteOldMessages,24*60*60*1000);
 
 // --- Autorisations toggle ---
 botFloat.addEventListener('contextmenu',e=>{ e.preventDefault(); authListDiv.style.display=authListDiv.style.display==='block'?'none':'block'; });
@@ -192,6 +187,20 @@ window.deleteInstr=(i)=>{ if(confirm('Supprimer ?')){instructions.splice(i,1); r
 window.editAuth=(i)=>{ const n=prompt('Modifier autorisation:',authorizations[i].name); if(!n) return; const m=prompt('Mode (free/payant)',authorizations[i].mode); authorizations[i].name=n; authorizations[i].mode=m; renderAuthTable(); renderBotAuthList();}
 window.deleteAuth=(i)=>{ if(confirm('Supprimer ?')){authorizations.splice(i,1); renderAuthTable(); renderBotAuthList();} }
 
+// --- Persistance ---
+renderInstrTable();
+renderAuthTable();
+renderBotAuthList();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker enregistré avec succès:', reg.scope))
+      .catch(err => console.log('Erreur Service Worker:', err));
+  });
+}
 </script>
 </body>
 </html>
