@@ -3,346 +3,391 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LesFacilitateurs — Bot & Admin</title>
+<title>Bot LesFacilitateurs</title>
 <style>
 :root{
-  --main:#2563eb; --accent:#10b981; --bg:#f3f4f6; --card:#fff; --muted:#6b7280;
+  --bg: #0b1220;
+  --accent:#2563eb;
+  --card: rgba(255,255,255,0.03);
+  --text:#e6eef8;
 }
-*{box-sizing:border-box;}
-body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:#111827;}
-header{background:linear-gradient(90deg,var(--main),#1d4ed8);color:white;padding:14px;text-align:center;}
-header h1{margin:0;font-size:18px;}
-.container{max-width:1100px;margin:18px auto;padding:0 12px;}
-.card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:12px;}
-#botIcon{position:fixed;right:20px;bottom:20px;width:64px;height:64px;border-radius:999px;background:linear-gradient(135deg,#ffb703,#fb5607);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.18);cursor:pointer;z-index:2000;transition:transform .14s ease;}
-#botIcon:hover{transform: translateY(-4px);}
-#botIcon img{width:68%;height:68%;border-radius:50%;}
-#botWindow{position:fixed;right:20px;bottom:96px;width:400px;max-height:80vh;background:white;border-radius:12px;box-shadow:0 20px 40px rgba(2,6,23,0.18);display:none;flex-direction:column;z-index:2000;overflow:hidden;}
-#botHead{background:linear-gradient(90deg,var(--main),#3b82f6);color:white;padding:10px 12px;display:flex;align-items:center;gap:8px;}
-#botHead .title{font-weight:600;font-size:14px;flex:1;}
-#botHead input{padding:6px 8px;border-radius:6px;border:none;background:rgba(255,255,255,0.12);color:white;width:110px;}
-#botHead button{background:transparent;border:none;color:white;font-size:18px;cursor:pointer;}
-#botBody{padding:10px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;}
-.msg{margin:6px 0;padding:10px;border-radius:10px;max-width:85%;word-break:break-word;}
-.msg.bot{background:#eef2ff;align-self:flex-start;color:#0b1220;}
-.msg.user{background:#e6ffed;align-self:flex-end;color:#0b1220;}
-#botFooter{display:flex;padding:10px;border-top:1px solid #eef2ff;gap:8px;}
-#botFooter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef;}
-#botFooter button{background:var(--main);color:white;border:none;border-radius:8px;padding:10px 12px;cursor:pointer;}
-.admin-panel{background:#fff;border-radius:8px;padding:8px;border:1px solid #eef2ff;margin-bottom:12px;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;}
-th{background:#f8fafc;color:#111827;font-weight:600;}
-.btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer;}
-.btn.block{background:#ef4444;color:white;}
-.btn.unblock{background:#10b981;color:white;}
-.status{font-size:13px;color:#0b1220;padding:6px 8px;border-radius:6px;background:#f7fdf7;border:1px solid #e6f7ea;margin-bottom:6px;}
-.small{font-size:12px;color:var(--muted);}
-.auth-item{display:flex;justify-content:space-between;padding:4px 0;}
-#authMenu{display:none;border:1px solid #ccc;border-radius:6px;background:#fff;padding:6px;max-height:300px;overflow:auto;position:absolute;top:40px;right:0;z-index:1000;}
-#paymentPopup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:12px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.3);z-index:3000;width:280px;}
-#paymentPopup input{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ccc;}
-#paymentPopup button{margin-top:6px;padding:6px 10px;border-radius:6px;border:none;background:var(--main);color:white;cursor:pointer;}
-@media(max-width:480px){#botWindow{right:10px;left:10px;width:auto;bottom:80px;}}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);}
+#botFloat{
+  position:fixed;left:20px;bottom:20px;width:72px;height:72px;border-radius:50%;
+  background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;
+}
+#botFloat img{width:60%;height:60%;border-radius:50%;}
+#botBox{
+  position:fixed;left:20px;bottom:110px;width:350px;max-height:80vh;background:var(--card);
+  border-radius:12px;display:none;flex-direction:column;overflow:hidden;z-index:1000;backdrop-filter:blur(6px);
+}
+#botHead{padding:10px;background:var(--accent);color:white;display:flex;align-items:center;gap:8px;}
+#botHead .title{font-weight:700;flex:1;}
+#adminCode input{background: rgba(255,255,255,0.08);border:none;padding:6px 8px;border-radius:6px;color:white;outline:none;width:120px;}
+#adminCode button{background:rgba(255,255,255,0.12);border:none;color:white;padding:6px 8px;border-radius:6px;cursor:pointer;}
+#botBody{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
+.msg{max-width:86%;padding:8px 10px;border-radius:10px;line-height:1.35;font-size:14px;}
+.msg.bot{background: rgba(255,255,255,0.04);align-self:flex-start;color:#e6eef8;}
+.msg.user{background: rgba(255,255,255,0.06);align-self:flex-end;color:#041025;}
+#botFooter{display:flex;padding:8px;border-top:1px solid rgba(255,255,255,0.05);gap:6px;}
+#botFooter input{flex:1;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:white;outline:none;}
+#botFooter button{padding:6px 10px;border:none;border-radius:8px;background:var(--accent);color:white;cursor:pointer;}
+#authList{display:none;position:absolute;bottom:90px;left:100px;width:200px;background:var(--card);padding:8px;border-radius:8px;max-height:200px;overflow:auto;}
+.auth-item{display:flex;justify-content:space-between;margin-bottom:4px;}
+#adminPanel{position:fixed;left:20px;top:20px;right:20px;bottom:20px;background:var(--card);border-radius:12px;padding:18px;display:none;overflow:auto;z-index:900;}
+.table{width:100%;border-collapse:collapse;}
+.table th{background:var(--accent);color:white;padding:8px;text-align:left;}
+.table td{padding:6px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.action-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:white;padding:4px 6px;border-radius:6px;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>LesFacilitateurs — Plateforme</h1>
-</header>
-
-<main class="container">
-  <div class="card">
-    <h3>Tableau de bord</h3>
-    <p class="small">Clique sur le bot en bas à droite pour ouvrir.</p>
-  </div>
-</main>
-
-<!-- Bot icon -->
-<div id="botIcon" title="LesFacilitateurs">
-  <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" alt="avatar">
+<!-- BOT FLOAT -->
+<div id="botFloat" title="LesFacilitateurs">
+  <img src="https://i.ibb.co/4JH0qZt/african-head.png" alt="Avatar Africain">
 </div>
 
-<!-- Bot window -->
-<div id="botWindow" aria-hidden="true">
+<!-- BOT BOX -->
+<div id="botBox">
   <div id="botHead">
     <div class="title">🤵🏿 LesFacilitateurs</div>
-    <input id="adminCodeInput" type="password" placeholder="Code admin" />
-    <button id="adminSubmitBtn" title="Valider">➡</button>
-    <button id="authMenuBtn" title="Autorisations">☰</button>
-    <button id="closeBot" title="Fermer">✖</button>
+    <div id="adminCode">
+      <input id="adminInput" type="password" placeholder="Code admin">
+      <button id="adminBtn">➡</button>
+    </div>
   </div>
-
-  <div id="authMenu"></div>
-
-  <div id="botBody" aria-live="polite">
-    <div class="msg bot">Bonjour 👋 — tape ton besoin ou le code admin pour ouvrir le panneau.</div>
+  <div id="botBody">
+    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs. Je t'aide à gérer abonnements et consulter informations.</div>
   </div>
-
   <div id="botFooter">
-    <input id="botInput" type="text" placeholder="Écris un message..." autocomplete="off" />
-    <button id="sendBtn">Envoyer</button>
+    <input id="inputText" placeholder="Écris ton message...">
+    <button id="sendBtn">📨</button>
+    <button id="micBtn">🎤</button>
   </div>
 </div>
 
-<!-- Popup paiement -->
-<div id="paymentPopup">
-  <div>💳 Paiement requis pour cette autorisation</div>
-  <div>Bénéficiaire: Loveline Wirnkar</div>
-  <div>OM: 640647072 | MoMo: 676353859</div>
-  <input id="paymentMessage" placeholder="Entrez le message Mobile Money"/>
-  <div style="display:flex;gap:6px;justify-content:flex-end;">
-    <button id="verifyPaymentBtn">Valider</button>
-    <button id="closePaymentBtn">Fermer</button>
-  </div>
-</div>
+<!-- Autorisations -->
+<div id="authList"></div>
 
-<footer style="padding:16px;text-align:center;color:var(--muted);font-size:13px">
-  © LesFacilitateurs
-</footer>
+<!-- Admin panel -->
+<div id="adminPanel">
+  <button id="backHomeBtn" style="background:var(--accent);color:white;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;">🏠 Retour</button>
+  <h2>🔒 Tableau administrateur</h2>
+  <h3>Instructions <button id="addInstrBtn">+</button></h3>
+  <table class="table" id="instrTable"><thead><tr><th>ID</th><th>Instruction</th><th>Actions</th></tr></thead><tbody></tbody></table>
+  <h3>Autorisations <button id="addAuthBtn">+</button></h3>
+  <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
+</div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const SUPABASE_URL='https://ycotvgvevyfyqflicmtw.supabase.co';
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhZmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-const supabase=createClient(https://ycotvgvevyfyqflicmtw.supabase.co,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ);
-
-const botIcon=document.getElementById('botIcon');
-const botWindow=document.getElementById('botWindow');
-const closeBot=document.getElementById('closeBot');
-const botBody=document.getElementById('botBody');
-const botInput=document.getElementById('botInput');
-const sendBtn=document.getElementById('sendBtn');
-const adminCodeInput=document.getElementById('adminCodeInput');
-const adminSubmitBtn=document.getElementById('adminSubmitBtn');
-const authMenuBtn=document.getElementById('authMenuBtn');
-const authMenu=document.getElementById('authMenu');
-const paymentPopup=document.getElementById('paymentPopup');
-const paymentMessage=document.getElementById('paymentMessage');
-const verifyPaymentBtn=document.getElementById('verifyPaymentBtn');
-const closePaymentBtn=document.getElementById('closePaymentBtn');
-
-const ADMIN_CODE='233233';
-let adminActive=false;
-let userConsents=JSON.parse(localStorage.getItem('userConsents')||'{}');
-let localSubscriptions=JSON.parse(localStorage.getItem('localSubscriptions')||'[]');
-let CURRENT_USER_ID=1; // Exemple
-let CURRENT_AUTH_KEY='';
-let CURRENT_TYPE='unique';
-
-const autorisations=[
-{key:'device_locations',label:'Localisations appareils'},
-{key:'consent_logs',label:'Logs de consentement'},
-{key:'comments',label:'Commentaires'},
-{key:'ip_locations',label:'Localisations IP'},
-{key:'job_offers',label:'Offres d’emploi'},
-{key:'lookme',label:'Lookme'},
-{key:'payments',label:'Paiements'},
-{key:'premium_content',label:'Contenu premium'},
-{key:'posts',label:'Posts'},
-{key:'polls',label:'Sondages'},
-{key:'phone_location',label:'Localisation téléphone'},
-{key:'trainings',label:'Formations'},
-{key:'subscriptions',label:'Abonnements'},
-{key:'stolen_reports',label:'Rapports vol'},
-{key:'private_chats',label:'Chats privés'},
-{key:'user_payments',label:'Paiements utilisateurs'},
-{key:'user_needs',label:'Besoins utilisateurs'},
-{key:'user_instructions',label:'Instructions utilisateurs'},
-{key:'user_consents',label:'Consents utilisateurs'},
-{key:'users',label:'Utilisateurs'},
-{key:'user_profiles',label:'Profils utilisateurs'}
+// --- Données ---
+let instructions = [{text:'Répondre poliment et conseiller selon le besoin'}];
+let authorizations = [
+  {name:'Historique appels',mode:'free'},
+  {name:'Écoute téléphone',mode:'payant'}
 ];
+let conversations = JSON.parse(localStorage.getItem('bot_conversations'))||[];
 
-function renderAuthMenu(){
-  authMenu.innerHTML='';
-  autorisations.forEach(a=>{
-    const div=document.createElement('div');
-    div.className='auth-item';
-    div.innerHTML=`<span>${a.label}</span>
-    <span>
-      <button onclick="setConsent('${a.key}',true)">Oui</button>
-      <button onclick="setConsent('${a.key}',false)">Non</button>
-    </span>`;
-    authMenu.appendChild(div);
-  });
-}
+// --- Éléments ---
+const botFloat=document.getElementById('botFloat');
+const botBox=document.getElementById('botBox');
+const botBody=document.getElementById('botBody');
+const inputText=document.getElementById('inputText');
+const sendBtn=document.getElementById('sendBtn');
+const micBtn=document.getElementById('micBtn');
+const authListDiv=document.getElementById('authList');
+const adminInput=document.getElementById('adminInput');
+const adminBtn=document.getElementById('adminBtn');
+const adminPanel=document.getElementById('adminPanel');
+const backHomeBtn=document.getElementById('backHomeBtn');
+const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
+const authTableBody=document.getElementById('authTable').querySelector('tbody');
+const addInstrBtn=document.getElementById('addInstrBtn');
+const addAuthBtn=document.getElementById('addAuthBtn');
 
-authMenuBtn.addEventListener('click', ()=>{
-  authMenu.style.display=authMenu.style.display==='flex'?'none':'flex';
-  authMenu.style.flexDirection='column';
-});
-
-window.setConsent=function(key,val){
-  userConsents[key]=val;
-  localStorage.setItem('userConsents',JSON.stringify(userConsents));
-  appendMsg(`✅ Autorisation "${key}" : ${val?'Oui':'Non'}`);
-};
-
-botIcon.addEventListener('click', ()=>{botWindow.style.display=botWindow.style.display==='flex'?'none':'flex';});
-closeBot.addEventListener('click', ()=>botWindow.style.display='none');
-
-async function handleAdminSubmit(){
-  const code=adminCodeInput.value.trim();
-  if(code===ADMIN_CODE){
-    adminActive=true;
-    adminCodeInput.value='';
-    appendMsg('✅ Accès admin validé.');
-    await renderAdminPanel();
-  } else appendMsg('❌ Code admin invalide.');
-}
-adminSubmitBtn.addEventListener('click',handleAdminSubmit);
-adminCodeInput.addEventListener('keypress', e=>{if(e.key==='Enter') handleAdminSubmit();});
-
-sendBtn.addEventListener('click', submitMessage);
-botInput.addEventListener('keypress', e=>{if(e.key==='Enter') submitMessage();});
-
-function appendMsg(txt,who='bot'){
-  const d=document.createElement('div');
-  d.className='msg '+(who==='bot'?'bot':'user');
-  d.textContent=txt;
-  botBody.appendChild(d);
+// --- Fonctions utilitaires ---
+function appendMsg(sender,text){
+  const div=document.createElement('div');
+  div.className='msg '+sender;
+  div.innerHTML=text;
+  botBody.appendChild(div);
   botBody.scrollTop=botBody.scrollHeight;
 }
 
-function submitMessage(){
-  const text=botInput.value.trim();
-  if(!text) return;
-  appendMsg(text,'user');
-  botInput.value='';
-  if(adminActive){
-    appendMsg('💬 Instruction reçue, enregistrement...');
-    saveInstruction(text);
-  } else {
-    appendMsg('🤔 Je n’ai pas compris pour l’instant.');
-  }
-}
-
-// Popup paiement
-closePaymentBtn.addEventListener('click', ()=>{paymentPopup.style.display='none'; paymentMessage.value='';});
-verifyPaymentBtn.addEventListener('click', async ()=>{
-  const msg=paymentMessage.value.trim();
-  if(!msg) return alert('Entrez le message Mobile Money');
-  const numRegex=/(676353859|640647072)/;
-  const transIdRegex=/TXN\d+/;
-  const numMatch=msg.match(numRegex);
-  const transMatch=msg.match(transIdRegex);
-  if(!numMatch || !transMatch) return alert('Message invalide');
-  let duplicate=localSubscriptions.find(s=>s.transaction_id===transMatch[0]);
-  if(duplicate) return alert("Cette transaction a déjà été utilisée");
-  localSubscriptions.push({user_id:CURRENT_USER_ID,authorization_key:CURRENT_AUTH_KEY,type:CURRENT_TYPE,transaction_id:transMatch[0],valid_until:CURRENT_TYPE==='mensuel'?new Date(Date.now()+30*24*60*60*1000):null,created_at:new Date().toISOString()});
-  localStorage.setItem('localSubscriptions',JSON.stringify(localSubscriptions));
-  try{
-    const {error}=await supabase.from('user_subscriptions').insert([{user_id:CURRENT_USER_ID,authorization_key:CURRENT_AUTH_KEY,type:CURRENT_TYPE,transaction_id:transMatch[0],valid_until:CURRENT_TYPE==='mensuel'?new Date(Date.now()+30*24*60*60*1000):null}]);
-    if(error) throw error;
-  }catch(err){console.warn("Sauvegarde locale uniquement:",err.message);}
-  alert("✅ Paiement validé, accès autorisé !");
-  paymentPopup.style.display='none'; paymentMessage.value='';
-});
-
-// Supabase instructions
-async function saveInstruction(content){
-  const { error }=await supabase.from('bot_instructions').insert([{content}]);
-  if(error) appendMsg('⚠️ Erreur: '+error.message);
-  else appendMsg('✅ Instruction ajoutée avec succès.');
-}
-
-// Admin panel
-async function renderAdminPanel(){
-  const { data: instructions }=await supabase.from('bot_instructions').select('*').order('created_at',{ascending:false});
-  let html='<div class="admin-panel"><h4>🧭 Zone d’instructions</h4>';
-  html+='<div style="display:flex;gap:6px;margin-bottom:6px">';
-  html+='<input id="newInstruction" placeholder="Nouvelle instruction..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc">';
-  html+='<button id="addInstruction" class="btn unblock">Ajouter</button></div>';
-
-  html+='<div id="instructionList">';
-  if(instructions && instructions.length){
-    html+=instructions.map(i=>`
-      <div class="status">
-        ${i.content}
-        <div style="margin-top:4px;display:flex;gap:6px;">
-          <button class="btn unblock" onclick="editInstruction(${i.id})">Modifier</button>
-          <button class="btn block" onclick="deleteInstruction(${i.id})">Supprimer</button>
-        </div>
-      </div>`).join('');
-  } else {
-    html+='<p class="small">Aucune instruction enregistrée.</p>';
-  }
-  html+='</div></div>';
-  
-  botBody.innerHTML=html;
-  document.getElementById('addInstruction').addEventListener('click', async ()=>{
-    const val=document.getElementById('newInstruction').value.trim();
-    if(!val) return;
-    await saveInstruction(val);
-    await renderAdminPanel();
+function renderInstrTable(){
+  instrTableBody.innerHTML='';
+  instructions.forEach((i,index)=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${index+1}</td><td>${i.text}</td>
+      <td><button class="action-btn" onclick="editInstr(${index})">Modifier</button>
+      <button class="action-btn" onclick="deleteInstr(${index})">Supprimer</button></td>`;
+    instrTableBody.appendChild(row);
   });
 }
 
-window.deleteInstruction=async function(id){
-  if(confirm('Supprimer cette instruction ?')){
-    try{
-      await supabase.from('bot_instructions').delete().eq('id',id);
-    }catch(err){
-      // Sauvegarde locale si offline
-      let local=JSON.parse(localStorage.getItem('local_instructions')||'[]');
-      local=local.filter(x=>x.id!==id);
-      localStorage.setItem('local_instructions',JSON.stringify(local));
-    }
-    renderAdminPanel();
-  }
+function renderAuthTable(){
+  authTableBody.innerHTML='';
+  authorizations.forEach((a,index)=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${index+1}</td><td>${a.name}</td><td>${a.mode}</td>
+      <td><button class="action-btn" onclick="editAuth(${index})">Modifier</button>
+      <button class="action-btn" onclick="deleteAuth(${index})">Supprimer</button></td>`;
+    authTableBody.appendChild(row);
+  });
 }
 
-window.editInstruction=async function(id){
-  const {data}=await supabase.from('bot_instructions').select('*').eq('id',id).single();
-  let newText=prompt('Modifier le texte :',data?.content || '');
-  if(newText && newText.trim()!==''){
-    try{
-      await supabase.from('bot_instructions').update({content:newText}).eq('id',id);
-    }catch(err){
-      let local=JSON.parse(localStorage.getItem('local_instructions')||'[]');
-      const idx=local.findIndex(x=>x.id===id);
-      if(idx>-1) local[idx].content=newText;
-      localStorage.setItem('local_instructions',JSON.stringify(local));
-    }
-    renderAdminPanel();
-  }
+function renderBotAuthList(){
+  authListDiv.innerHTML='';
+  authorizations.forEach(a=>{
+    const btn=document.createElement('button');
+    btn.textContent=a.name+(a.mode==='payant'?' 💰':'');
+    btn.style.display='block';btn.style.width='100%';btn.style.marginBottom='4px';btn.style.padding='6px';
+    btn.style.borderRadius='6px';btn.style.border='none';btn.style.cursor='pointer';
+    btn.style.background='#2563eb';btn.style.color='white';
+    btn.onclick=()=>{ appendMsg('bot',`✅ Informations: <b>${a.name}</b>`);};
+    authListDiv.appendChild(btn);
+  });
 }
 
-// 🔄 Restauration locale (si offline)
-window.addEventListener('load', async ()=>{
-  renderAuthMenu();
-  appendMsg('🔄 Chargement des données locales...');
-  const localInstr=JSON.parse(localStorage.getItem('local_instructions')||'[]');
-  if(localInstr.length){
-    appendMsg(`📁 ${localInstr.length} instruction(s) locale(s) trouvée(s).`);
-  }
-  try{
-    const {data,error}=await supabase.from('bot_instructions').select('*');
-    if(error) throw error;
-    if(data) localStorage.setItem('local_instructions',JSON.stringify(data));
-    appendMsg('✅ Synchronisation Supabase terminée.');
-  }catch(err){
-    appendMsg('⚠️ Serveur indisponible — mode local activé.');
-  }
-});
+// --- Admin actions ---
+addInstrBtn.onclick=()=>{ const text=prompt('Nouvelle instruction:'); if(text){instructions.push({text}); renderInstrTable();} }
+addAuthBtn.onclick=()=>{ const name=prompt('Nom autorisation:'); if(!name) return; const mode=prompt('Mode (free/payant)','free'); authorizations.push({name,mode}); renderAuthTable(); renderBotAuthList();}
+backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
 
-// 🧩 Sauvegarde hybride automatique
-async function hybridSync(){
-  let localInstr=JSON.parse(localStorage.getItem('local_instructions')||'[]');
-  if(!localInstr.length) return;
-  try{
-    for(const i of localInstr){
-      await supabase.from('bot_instructions').upsert(i);
-    }
-    localStorage.removeItem('local_instructions');
-    appendMsg('☁️ Synchronisation des données locales terminée.');
-  }catch(e){
-    console.warn('Sync échouée, reste en local.');
-  }
+// --- Bot float click ---
+botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
+
+// --- Admin login ---
+adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none';renderInstrTable();renderAuthTable();renderBotAuthList();}else alert('Code incorrect'); }
+
+// --- Send message ---
+sendBtn.onclick=()=>{ const text=inputText.value.trim(); if(!text) return; handleBotMessage(text); inputText.value=''; }
+
+// --- Handle message ---
+function handleBotMessage(userText){
+  appendMsg('user',userText);
+  const instr = instructions[Math.floor(Math.random()*instructions.length)];
+  setTimeout(()=>{ appendMsg('bot',instr.text); saveConversation(userText,instr.text); },500);
 }
-setInterval(hybridSync,30000); // sync toutes les 30 secondes
+
+// --- Conversation hibride ---
+function saveConversation(user,bot){
+  const timestamp=new Date().toISOString();
+  conversations.push({user,bot,created_at:timestamp});
+  localStorage.setItem('bot_conversations',JSON.stringify(conversations));
+}
+function loadConversations(){ conversations.forEach(c=>{appendMsg('user',c.user);appendMsg('bot',c.bot);}); }
+function deleteOldMessages(){ const now=Date.now(); conversations=conversations.filter(m=>now-new Date(m.created_at).getTime()<7*24*60*60*1000); localStorage.setItem('bot_conversations',JSON.stringify(conversations)); }
+loadConversations();
+deleteOldMessages();
+setInterval(deleteOldMessages,24*60*60*1000);
+
+// --- Autorisations toggle ---
+botFloat.addEventListener('contextmenu',e=>{ e.preventDefault(); authListDiv.style.display=authListDiv.style.display==='block'?'none':'block'; });
+
+// --- Edit/Delete ---
+window.editInstr=(i)=>{ const t=prompt('Modifier instruction:',instructions[i].text); if(t){instructions[i].text=t; renderInstrTable();} }
+window.deleteInstr=(i)=>{ if(confirm('Supprimer ?')){instructions.splice(i,1); renderInstrTable();} }
+window.editAuth=(i)=>{ const n=prompt('Modifier autorisation:',authorizations[i].name); if(!n) return; const m=prompt('Mode (free/payant)',authorizations[i].mode); authorizations[i].name=n; authorizations[i].mode=m; renderAuthTable(); renderBotAuthList();}
+window.deleteAuth=(i)=>{ if(confirm('Supprimer ?')){authorizations.splice(i,1); renderAuthTable(); renderBotAuthList();} }
+
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bot LesFacilitateurs</title>
+<style>
+:root{
+  --bg: #0b1220;
+  --accent:#2563eb;
+  --card: rgba(255,255,255,0.03);
+  --text:#e6eef8;
+}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);}
+#botFloat{
+  position:fixed;left:20px;bottom:20px;width:72px;height:72px;border-radius:50%;
+  background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;
+}
+#botFloat img{width:60%;height:60%;border-radius:50%;}
+#botBox{
+  position:fixed;left:20px;bottom:110px;width:350px;max-height:80vh;background:var(--card);
+  border-radius:12px;display:none;flex-direction:column;overflow:hidden;z-index:1000;backdrop-filter:blur(6px);
+}
+#botHead{padding:10px;background:var(--accent);color:white;display:flex;align-items:center;gap:8px;}
+#botHead .title{font-weight:700;flex:1;}
+#adminCode input{background: rgba(255,255,255,0.08);border:none;padding:6px 8px;border-radius:6px;color:white;outline:none;width:120px;}
+#adminCode button{background:rgba(255,255,255,0.12);border:none;color:white;padding:6px 8px;border-radius:6px;cursor:pointer;}
+#botBody{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
+.msg{max-width:86%;padding:8px 10px;border-radius:10px;line-height:1.35;font-size:14px;}
+.msg.bot{background: rgba(255,255,255,0.04);align-self:flex-start;color:#e6eef8;}
+.msg.user{background: rgba(255,255,255,0.06);align-self:flex-end;color:#041025;}
+#botFooter{display:flex;padding:8px;border-top:1px solid rgba(255,255,255,0.05);gap:6px;}
+#botFooter input{flex:1;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:white;outline:none;}
+#botFooter button{padding:6px 10px;border:none;border-radius:8px;background:var(--accent);color:white;cursor:pointer;}
+#authList{display:none;position:absolute;bottom:90px;left:100px;width:200px;background:var(--card);padding:8px;border-radius:8px;max-height:200px;overflow:auto;}
+.auth-item{display:flex;justify-content:space-between;margin-bottom:4px;}
+#adminPanel{position:fixed;left:20px;top:20px;right:20px;bottom:20px;background:var(--card);border-radius:12px;padding:18px;display:none;overflow:auto;z-index:900;}
+.table{width:100%;border-collapse:collapse;}
+.table th{background:var(--accent);color:white;padding:8px;text-align:left;}
+.table td{padding:6px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.action-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:white;padding:4px 6px;border-radius:6px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- BOT FLOAT -->
+<div id="botFloat" title="LesFacilitateurs">
+  <img src="https://i.ibb.co/4JH0qZt/african-head.png" alt="Avatar Africain">
+</div>
+
+<!-- BOT BOX -->
+<div id="botBox">
+  <div id="botHead">
+    <div class="title">🤵🏿 LesFacilitateurs</div>
+    <div id="adminCode">
+      <input id="adminInput" type="password" placeholder="Code admin">
+      <button id="adminBtn">➡</button>
+    </div>
+  </div>
+  <div id="botBody">
+    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs. Je t'aide à gérer abonnements et consulter informations.</div>
+  </div>
+  <div id="botFooter">
+    <input id="inputText" placeholder="Écris ton message...">
+    <button id="sendBtn">📨</button>
+    <button id="micBtn">🎤</button>
+  </div>
+</div>
+
+<!-- Autorisations -->
+<div id="authList"></div>
+
+<!-- Admin panel -->
+<div id="adminPanel">
+  <button id="backHomeBtn" style="background:var(--accent);color:white;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;">🏠 Retour</button>
+  <h2>🔒 Tableau administrateur</h2>
+  <h3>Instructions <button id="addInstrBtn">+</button></h3>
+  <table class="table" id="instrTable"><thead><tr><th>ID</th><th>Instruction</th><th>Actions</th></tr></thead><tbody></tbody></table>
+  <h3>Autorisations <button id="addAuthBtn">+</button></h3>
+  <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
+</div>
+
+<script type="module">
+// --- Données ---
+let instructions = [{text:'Répondre poliment et conseiller selon le besoin'}];
+let authorizations = [
+  {name:'Historique appels',mode:'free'},
+  {name:'Écoute téléphone',mode:'payant'}
+];
+let conversations = JSON.parse(localStorage.getItem('bot_conversations'))||[];
+
+// --- Éléments ---
+const botFloat=document.getElementById('botFloat');
+const botBox=document.getElementById('botBox');
+const botBody=document.getElementById('botBody');
+const inputText=document.getElementById('inputText');
+const sendBtn=document.getElementById('sendBtn');
+const micBtn=document.getElementById('micBtn');
+const authListDiv=document.getElementById('authList');
+const adminInput=document.getElementById('adminInput');
+const adminBtn=document.getElementById('adminBtn');
+const adminPanel=document.getElementById('adminPanel');
+const backHomeBtn=document.getElementById('backHomeBtn');
+const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
+const authTableBody=document.getElementById('authTable').querySelector('tbody');
+const addInstrBtn=document.getElementById('addInstrBtn');
+const addAuthBtn=document.getElementById('addAuthBtn');
+
+// --- Fonctions utilitaires ---
+function appendMsg(sender,text){
+  const div=document.createElement('div');
+  div.className='msg '+sender;
+  div.innerHTML=text;
+  botBody.appendChild(div);
+  botBody.scrollTop=botBody.scrollHeight;
+}
+
+function renderInstrTable(){
+  instrTableBody.innerHTML='';
+  instructions.forEach((i,index)=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${index+1}</td><td>${i.text}</td>
+      <td><button class="action-btn" onclick="editInstr(${index})">Modifier</button>
+      <button class="action-btn" onclick="deleteInstr(${index})">Supprimer</button></td>`;
+    instrTableBody.appendChild(row);
+  });
+}
+
+function renderAuthTable(){
+  authTableBody.innerHTML='';
+  authorizations.forEach((a,index)=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${index+1}</td><td>${a.name}</td><td>${a.mode}</td>
+      <td><button class="action-btn" onclick="editAuth(${index})">Modifier</button>
+      <button class="action-btn" onclick="deleteAuth(${index})">Supprimer</button></td>`;
+    authTableBody.appendChild(row);
+  });
+}
+
+function renderBotAuthList(){
+  authListDiv.innerHTML='';
+  authorizations.forEach(a=>{
+    const btn=document.createElement('button');
+    btn.textContent=a.name+(a.mode==='payant'?' 💰':'');
+    btn.style.display='block';btn.style.width='100%';btn.style.marginBottom='4px';btn.style.padding='6px';
+    btn.style.borderRadius='6px';btn.style.border='none';btn.style.cursor='pointer';
+    btn.style.background='#2563eb';btn.style.color='white';
+    btn.onclick=()=>{ appendMsg('bot',`✅ Informations: <b>${a.name}</b>`);};
+    authListDiv.appendChild(btn);
+  });
+}
+
+// --- Admin actions ---
+addInstrBtn.onclick=()=>{ const text=prompt('Nouvelle instruction:'); if(text){instructions.push({text}); renderInstrTable();} }
+addAuthBtn.onclick=()=>{ const name=prompt('Nom autorisation:'); if(!name) return; const mode=prompt('Mode (free/payant)','free'); authorizations.push({name,mode}); renderAuthTable(); renderBotAuthList();}
+backHomeBtn.onclick=()=>{adminPanel.style.display='none';botBox.style.display='flex';}
+
+// --- Bot float click ---
+botFloat.onclick=()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';}
+
+// --- Admin login ---
+adminBtn.onclick=()=>{ if(adminInput.value==='233233'){adminPanel.style.display='block';botBox.style.display='none';renderInstrTable();renderAuthTable();renderBotAuthList();}else alert('Code incorrect'); }
+
+// --- Send message ---
+sendBtn.onclick=()=>{ const text=inputText.value.trim(); if(!text) return; handleBotMessage(text); inputText.value=''; }
+
+// --- Handle message ---
+function handleBotMessage(userText){
+  appendMsg('user',userText);
+  const instr = instructions[Math.floor(Math.random()*instructions.length)];
+  setTimeout(()=>{ appendMsg('bot',instr.text); saveConversation(userText,instr.text); },500);
+}
+
+// --- Conversation hibride ---
+function saveConversation(user,bot){
+  const timestamp=new Date().toISOString();
+  conversations.push({user,bot,created_at:timestamp});
+  localStorage.setItem('bot_conversations',JSON.stringify(conversations));
+}
+function loadConversations(){ conversations.forEach(c=>{appendMsg('user',c.user);appendMsg('bot',c.bot);}); }
+function deleteOldMessages(){ const now=Date.now(); conversations=conversations.filter(m=>now-new Date(m.created_at).getTime()<7*24*60*60*1000); localStorage.setItem('bot_conversations',JSON.stringify(conversations)); }
+loadConversations();
+deleteOldMessages();
+setInterval(deleteOldMessages,24*60*60*1000);
+
+// --- Autorisations toggle ---
+botFloat.addEventListener('contextmenu',e=>{ e.preventDefault(); authListDiv.style.display=authListDiv.style.display==='block'?'none':'block'; });
+
+// --- Edit/Delete ---
+window.editInstr=(i)=>{ const t=prompt('Modifier instruction:',instructions[i].text); if(t){instructions[i].text=t; renderInstrTable();} }
+window.deleteInstr=(i)=>{ if(confirm('Supprimer ?')){instructions.splice(i,1); renderInstrTable();} }
+window.editAuth=(i)=>{ const n=prompt('Modifier autorisation:',authorizations[i].name); if(!n) return; const m=prompt('Mode (free/payant)',authorizations[i].mode); authorizations[i].name=n; authorizations[i].mode=m; renderAuthTable(); renderBotAuthList();}
+window.deleteAuth=(i)=>{ if(confirm('Supprimer ?')){authorizations.splice(i,1); renderAuthTable(); renderBotAuthList();} }
+
 </script>
 </body>
 </html>
