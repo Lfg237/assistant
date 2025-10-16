@@ -133,19 +133,50 @@ async function startBot() {
     await loadInstructions();
   }
 
-  function renderInstrTable(){
-    instrTableBody.innerHTML='';
-    instructions.forEach((i)=>{
-      const row=document.createElement('tr');
-      row.innerHTML=`<td>${i.id}</td><td>${i.instruction}</td>
-        <td>
-          <button class="action-btn" onclick="editInstrPrompt(${i.id},'${i.instruction.replace(/'/g,"\\'")}')">Modifier</button>
-          <button class="action-btn" onclick="deleteInstruction(${i.id})">Supprimer</button>
-        </td>`;
-      instrTableBody.appendChild(row);
-    });
-  }
+  // Remplacer la fonction renderInstrTable() par celle-ci (à l'intérieur de startBot)
+function renderInstrTable(){
+  instrTableBody.innerHTML = '';
+  instructions.forEach(i=>{
+    const row = document.createElement('tr');
 
+    const tdId = document.createElement('td');
+    tdId.textContent = i.id;
+
+    const tdText = document.createElement('td');
+    tdText.textContent = i.instruction;
+
+    const tdActions = document.createElement('td');
+
+    // Bouton Modifier
+    const btnEdit = document.createElement('button');
+    btnEdit.className = 'action-btn';
+    btnEdit.textContent = 'Modifier';
+    btnEdit.addEventListener('click', async () => {
+      const newText = prompt('Modifier instruction:', i.instruction);
+      if (!newText) return;
+      await editInstruction(i.id, newText);
+    });
+
+    // Bouton Supprimer
+    const btnDelete = document.createElement('button');
+    btnDelete.className = 'action-btn';
+    btnDelete.textContent = 'Supprimer';
+    btnDelete.addEventListener('click', async () => {
+      if (!confirm('Supprimer cette instruction ?')) return;
+      await deleteInstruction(i.id);
+    });
+
+    tdActions.appendChild(btnEdit);
+    tdActions.appendChild(document.createTextNode(' ')); // petit espacement
+    tdActions.appendChild(btnDelete);
+
+    row.appendChild(tdId);
+    row.appendChild(tdText);
+    row.appendChild(tdActions);
+
+    instrTableBody.appendChild(row);
+  });
+}
   window.editInstrPrompt = async (id,oldText)=>{
     const t = prompt('Modifier instruction:',oldText);
     if(t) await editInstruction(id,t);
