@@ -184,11 +184,37 @@ function renderInstrTable() {
   instrTableBody.innerHTML = '';
   instructions.forEach(i => {
     const row = document.createElement('tr');
-    row.innerHTML = `<td>${i.id}</td><td>${i.instruction}</td>
-    <td><button class="action-btn" onclick="editInstr(${i.id})">Modifier</button>
-      <button class="action-btn" onclick="deleteInstr(${i.id})">Supprimer</button>
-    </td>`;
+    row.innerHTML = `
+      <td>${i.id}</td>
+      <td>${i.instruction}</td>
+      <td>
+        <button class="action-btn edit-btn" data-id="${i.id}">Modifier</button>
+        <button class="action-btn delete-btn" data-id="${i.id}">Supprimer</button>
+      </td>
+    `;
     instrTableBody.appendChild(row);
+  });
+
+  // Ajouter les événements après création
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.id;
+      const instr = instructions.find(ins => ins.id == id);
+      const newText = prompt('Modifier instruction:', instr.instruction);
+      if (newText) {
+        await supabase.from('bot_instructions').update({ instruction: newText }).eq('id', id);
+        loadInstructions();
+      }
+    }
+  });
+
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.id;
+      if (!confirm('Supprimer cette instruction ?')) return;
+      await supabase.from('bot_instructions').delete().eq('id', id);
+      loadInstructions();
+    }
   });
 }
 
