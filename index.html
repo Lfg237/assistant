@@ -1,220 +1,285 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LesFacilitateurs</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>assistant commercial LesFacilitateurs </title>
 <link rel="icon" href="https://i.ibb.co/4JH0qZt/african-head.png" type="image/png">
 <style>
 :root{
-  --bg: #0b1220;
-  --accent:#2563eb;
-  --card: rgba(255,255,255,0.03);
-  --text:#e6eef8;
+  --bg:#0b1220; --accent:#2563eb; --card:rgba(255,255,255,0.03); --text:#e6eef8;
 }
 body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);}
-#botFloat{position:fixed;left:20px;bottom:20px;width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;}
+
+/* BOT FLOAT */
+#botFloat{
+  position:fixed; left:20px; bottom:20px; width:72px; height:72px; border-radius:50%;
+  background:var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:1100;
+}
 #botFloat img{width:60%;height:60%;border-radius:50%;}
-#botBox{position:fixed;left:20px;bottom:110px;width:350px;max-height:80vh;background:var(--card);border-radius:12px;display:none;flex-direction:column;overflow:hidden;z-index:1000;backdrop-filter:blur(6px);}
+
+/* BOT BOX */
+#botBox{
+  position:fixed; left:50%; bottom:110px; transform:translateX(-50%);
+  width:350px; max-height:80vh; background:var(--card); border-radius:12px;
+  display:flex; flex-direction:column; overflow:hidden; z-index:1100; backdrop-filter:blur(6px); display:none;
+}
 #botHead{padding:10px;background:var(--accent);color:white;display:flex;align-items:center;gap:8px;}
-#botHead .title{font-weight:700;flex:1;}
-#adminCode input{background: rgba(255,255,255,0.08);border:none;padding:6px 8px;border-radius:6px;color:white;outline:none;width:120px;}
-#adminCode button{background:rgba(255,255,255,0.12);border:none;color:white;padding:6px 8px;border-radius:6px;cursor:pointer;}
+#botHead .title{flex:1;font-weight:700;}
 #botBody{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
 .msg{max-width:86%;padding:8px 10px;border-radius:10px;line-height:1.35;font-size:14px;}
-.msg.bot{background: rgba(255,255,255,0.04);align-self:flex-start;color:#e6eef8;}
-.msg.user{background: rgba(255,255,255,0.06);align-self:flex-end;color:#041025;}
+.msg.bot{background:rgba(255,255,255,0.04);align-self:flex-start;color:var(--text);}
+.msg.user{background:rgba(255,255,255,0.06);align-self:flex-end;color:#041025;}
 #botFooter{display:flex;padding:8px;border-top:1px solid rgba(255,255,255,0.05);gap:6px;}
 #botFooter input{flex:1;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:white;outline:none;}
-#botFooter button{padding:6px 10px;border:none;border-radius:8px;background:var(--accent);color:white;cursor:pointer;}
-#authList{display:none;position:absolute;bottom:90px;left:100px;width:200px;background:var(--card);padding:8px;border-radius:8px;max-height:200px;overflow:auto;}
-.auth-item{display:flex;justify-content:space-between;margin-bottom:4px;}
-#adminPanel{position:fixed;left:20px;top:20px;right:20px;bottom:20px;background:var(--card);border-radius:12px;padding:18px;display:none;overflow:auto;z-index:900;}
-.table{width:100%;border-collapse:collapse;}
-.table th{background:var(--accent);color:white;padding:8px;text-align:left;}
-.table td{padding:6px;border-bottom:1px solid rgba(255,255,255,0.05);}
-.action-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:white;padding:4px 6px;border-radius:6px;cursor:pointer;}
+#botFooter button{padding:6px 10px;border:none;border-radius:8px;background:var(--accent);color:white;cursor:pointer}
+
+/* LISTE DES AUTORISATIONS */
+#authList{
+  display:none; position:fixed; top:70px; left:50%; transform:translateX(-50%);
+  width:360px; max-height:240px; overflow:auto; background:#172544; padding:8px; border-radius:8px; z-index:1090;
+}
+.auth-item{padding:8px;border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,0.02);cursor:pointer}
+.auth-item:hover{background:rgba(255,255,255,0.04)}
+
+/* ADMIN PANEL */
+#adminPanel {
+  position: fixed;
+  top: 20px;           /* distance depuis le haut */
+  right: 20px;         /* distance depuis la droite */
+  width: 400px;        /* largeur du panel */
+  max-height: 80vh;    /* hauteur max */
+  overflow: auto;
+  background: rgba(0,0,0,0.85);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 1200;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  transform: none;     /* on supprime le translate pour ne pas le centrer */
+
+}
+#adminPanel h2, #adminPanel h3{color:white; margin:8px 0;}
+#adminPanel .table{width:100%; border-collapse:collapse; margin-top:10px;}
+#adminPanel .table th{background:var(--accent); color:white; padding:8px; text-align:left;}
+#adminPanel .table td{padding:6px; border-bottom:1px solid rgba(255,255,255,0.04);}
+#adminPanel .action-btn{background:transparent; border:1px solid rgba(255,255,255,0.06); color:white; padding:4px 6px; border-radius:6px; cursor:pointer;}
+
+/* Responsive */
+@media (max-width:420px){
+  #botBox{width:calc(100% - 20px); left:10px; transform:none;}
+  #authList{width:calc(100% - 20px);}
+  #adminPanel{width:95%;}
+}
 </style>
 </head>
 <body>
 
 <!-- BOT FLOAT -->
-<div id="botFloat" title="LesFacilitateurs">
-  <img src="https://i.ibb.co/4JH0qZt/african-head.png" alt="Avatar Africain">
+<div id="botFloat" title="Ouvrir le bot">
+  <img src="https://i.ibb.co/4JH0qZt/african-head.png" alt="bot">
 </div>
 
 <!-- BOT BOX -->
 <div id="botBox">
   <div id="botHead">
-    <div class="title">🤵🏿 LesFacilitateurs</div>
-    <div id="adminCode">
-      <input id="adminInput" type="password" placeholder="Code admin">
-      <button id="adminBtn">➡</button>
+    <div class="title">🤵🏿   LesFacilitateurs</div>
+    <div id="userIdDisplay">ID: <span id="userId">12345</span></div>
+    <button id="toggleAuthBtn" style="background:#1b2b4a;color:white;border:none;padding:6px;border-radius:6px;cursor:pointer">Autorisations</button>
+    <div style="margin-left:8px;">
+      <input id="adminInput" type="password" placeholder="Code admin" style="background:rgba(255,255,255,0.06);border:none;color:white;padding:6px;border-radius:6px;outline:none">
+      <button id="adminBtn" style="background:rgba(255,255,255,0.06);border:none;padding:6px;border-radius:6px;color:white;cursor:pointer">➡</button>
     </div>
   </div>
-  <div id="botBody">
-    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs. Je t'aide à gérer abonnements et consulter informations.</div>
+  <div id="botBody" aria-live="polite">
+    <div class="msg bot">Bonjour 👋 — je suis LesFacilitateurs. Clique sur Autorisations ou entre le code admin.</div>
   </div>
   <div id="botFooter">
-    <input id="inputText" placeholder="Écris ton message...">
+    <input id="inputText" placeholder="Écris ton message..." autocomplete="off">
     <button id="sendBtn">📨</button>
-    <button id="micBtn">🎤</button>
   </div>
 </div>
 
-<!-- Autorisations -->
+<!-- LISTE DES AUTORISATIONS -->
 <div id="authList"></div>
 
-<!-- Admin panel -->
+<!-- ADMIN PANEL -->
 <div id="adminPanel">
-  <button id="backHomeBtn" style="background:var(--accent);color:white;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;">🏠 Retour</button>
-  <h2>🔒 Tableau administrateur</h2>
-  <h3>Instructions <button id="addInstrBtn">+</button></h3>
-  <table class="table" id="instrTable"><thead><tr><th>ID</th><th>Instruction</th><th>Actions</th></tr></thead><tbody></tbody></table>
-  <h3>Autorisations <button id="addAuthBtn">+</button></h3>
-  <table class="table" id="authTable"><thead><tr><th>ID</th><th>Autorisation</th><th>Mode</th><th>Actions</th></tr></thead><tbody></tbody></table>
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2>🔒 Tableau administrateur</h2>
+    <button id="closeAdminBtn" style="background:var(--accent); color:white; padding:6px; border-radius:6px; border:none; cursor:pointer">Fermer</button>
+  </div>
+  <h3>Instructions 
+    <button id="addInstrBtn" style="margin-left:8px; padding:6px; border-radius:6px; border:none; cursor:pointer">+</button>
+  </h3>
+  <table class="table" id="instrTable">
+    <thead><tr><th>ID</th><th>Instruction</th><th>Actions</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<!-- Entête manuscrite fixe -->
+<div class="handwritten-header">
+  📚assistant commercial Lesfacilitateurs Middleman What's 651475255💰
 </div>
 
+<style>
+/* Police manuscrite via Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+
+.handwritten-header {
+  position: sticky; /* reste en haut quand tu scroll */
+  top: 0;
+  background-color: rgba(37,99,235,0.9); /* bleu accent */
+  color: white;
+  font-family: 'Indie Flower', cursive; /* écriture à la main */
+  font-size: 24px;
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 2px solid rgba(255,255,255,0.3);
+  z-index: 1000; /* au-dessus des autres éléments */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
-async function startBot() {
-  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-  const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-  const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  let instructions = [];
+const botFloat = document.getElementById('botFloat');
+const botBox = document.getElementById('botBox');
+const botBody = document.getElementById('botBody');
+const inputText = document.getElementById('inputText');
+const sendBtn = document.getElementById('sendBtn');
+const toggleAuthBtn = document.getElementById('toggleAuthBtn');
+const authListDiv = document.getElementById('authList');
+const adminInput = document.getElementById('adminInput');
+const adminBtn = document.getElementById('adminBtn');
+const adminPanel = document.getElementById('adminPanel');
+const closeAdminBtn = document.getElementById('closeAdminBtn');
+const addInstrBtn = document.getElementById('addInstrBtn');
+const instrTableBody = document.getElementById('instrTable').querySelector('tbody');
 
-  const botFloat=document.getElementById('botFloat');
-  const botBox=document.getElementById('botBox');
-  const botBody=document.getElementById('botBody');
-  const inputText=document.getElementById('inputText');
-  const sendBtn=document.getElementById('sendBtn');
-  const adminInput=document.getElementById('adminInput');
-  const adminBtn=document.getElementById('adminBtn');
-  const adminPanel=document.getElementById('adminPanel');
-  const backHomeBtn=document.getElementById('backHomeBtn');
-  const instrTableBody=document.getElementById('instrTable').querySelector('tbody');
-  const addInstrBtn=document.getElementById('addInstrBtn');
+let instructions = [];
 
-  function appendMsg(sender,text){
-    const div=document.createElement('div');
-    div.className='msg '+sender;
-    div.innerHTML=text;
-    botBody.appendChild(div);
-    botBody.scrollTop=botBody.scrollHeight;
-  }
+// Afficher message dans le bot
+function appendMsg(sender, text) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + sender;
+  div.innerHTML = text;
+  botBody.appendChild(div);
+  botBody.scrollTop = botBody.scrollHeight;
+}
 
-  async function loadInstructions(){
-    const { data, error } = await supabase.from('bot_instructions').select('*');
-    if(error) { console.error(error); return; }
+// Charger instructions depuis Supabase
+async function loadInstructions() {
+  const { data, error } = await supabase.from('bot_instructions').select('*');
+  if (!error && data) {
     instructions = data;
     renderInstrTable();
   }
+}
 
-  async function addInstruction(text){
-    const { data, error } = await supabase.from('bot_instructions').insert([{instruction:text}]).select();
-    if(error) { alert('Erreur: '+error.message); return; }
-    instructions.push(data[0]);
-    renderInstrTable();
-  }
-
-  async function editInstruction(id,newText){
-    const { data, error } = await supabase.from('bot_instructions').update({instruction:newText}).eq('id',id).select();
-    if(error){ alert(error.message); return; }
-    await loadInstructions();
-  }
-
-  async function deleteInstruction(id){
-    if(!confirm('Supprimer ?')) return;
-    const { error } = await supabase.from('bot_instructions').delete().eq('id',id);
-    if(error){ alert(error.message); return; }
-    await loadInstructions();
-  }
-
-  // Remplacer la fonction renderInstrTable() par celle-ci (à l'intérieur de startBot)
-function renderInstrTable(){
+// Afficher tableau des instructions
+function renderInstrTable() {
   instrTableBody.innerHTML = '';
-  instructions.forEach(i=>{
+  instructions.forEach(i => {
     const row = document.createElement('tr');
-
-    const tdId = document.createElement('td');
-    tdId.textContent = i.id;
-
-    const tdText = document.createElement('td');
-    tdText.textContent = i.instruction;
-
-    const tdActions = document.createElement('td');
-
-    // Bouton Modifier
-    const btnEdit = document.createElement('button');
-    btnEdit.className = 'action-btn';
-    btnEdit.textContent = 'Modifier';
-    btnEdit.addEventListener('click', async () => {
-      const newText = prompt('Modifier instruction:', i.instruction);
-      if (!newText) return;
-      await editInstruction(i.id, newText);
-    });
-
-    // Bouton Supprimer
-    const btnDelete = document.createElement('button');
-    btnDelete.className = 'action-btn';
-    btnDelete.textContent = 'Supprimer';
-    btnDelete.addEventListener('click', async () => {
-      if (!confirm('Supprimer cette instruction ?')) return;
-      await deleteInstruction(i.id);
-    });
-
-    tdActions.appendChild(btnEdit);
-    tdActions.appendChild(document.createTextNode(' ')); // petit espacement
-    tdActions.appendChild(btnDelete);
-
-    row.appendChild(tdId);
-    row.appendChild(tdText);
-    row.appendChild(tdActions);
-
+    row.innerHTML = `<td>${i.id}</td><td>${i.instruction}</td>
+    <td><button class="action-btn" onclick="editInstr(${i.id})">Modifier</button>
+      <button class="action-btn" onclick="deleteInstr(${i.id})">Supprimer</button>
+    </td>`;
     instrTableBody.appendChild(row);
   });
 }
-  window.editInstrPrompt = async (id,oldText)=>{
-    const t = prompt('Modifier instruction:',oldText);
-    if(t) await editInstruction(id,t);
-  };
 
-  // --- Admin login ---
-  adminBtn.onclick = ()=>{
-    if(adminInput.value==='233233'){
-      adminPanel.style.display='block';
-      botBox.style.display='none';
-      loadInstructions();
-    } else alert('Code incorrect');
-  };
-
-  backHomeBtn.onclick = ()=>{adminPanel.style.display='none'; botBox.style.display='flex';};
-
-  addInstrBtn.onclick = async ()=>{
-    const text = prompt('Nouvelle instruction:');
-    if(!text) return;
-    await addInstruction(text);
-  };
-
-  botFloat.onclick = ()=>{botBox.style.display=botBox.style.display==='flex'?'none':'flex';};
-
-  sendBtn.onclick = ()=>{ 
-    const text=inputText.value.trim(); 
-    if(!text) return; 
-    appendMsg('user', text); 
-    inputText.value='';
-    if(instructions.length>0){
-      const instr = instructions[Math.floor(Math.random()*instructions.length)];
-      appendMsg('bot', instr.instruction);
-    } else appendMsg('bot','Merci pour ton message !');
-  };
+// Modifier une instruction
+window.editInstr = async function(id) {
+  const instr = instructions.find(i => i.id === id);
+  if (!instr) return;
+  const t = prompt('Modifier instruction:', instr.instruction);
+  if (t) {
+    await supabase.from('bot_instructions').update({ instruction: t }).eq('id', id);
+    loadInstructions();
+  }
 }
 
-startBot();
-</script>
+// Supprimer une instruction
+window.deleteInstr = async function(id) {
+  if (!confirm('Supprimer cette instruction ?')) return;
+  await supabase.from('bot_instructions').delete().eq('id', id);
+  loadInstructions();
+}
 
+// Ajouter une instruction
+addInstrBtn.onclick = async function() {
+  const t = prompt('Nouvelle instruction:');
+  if (t) {
+    await supabase.from('bot_instructions').insert([{ instruction: t }]);
+    loadInstructions();
+  }
+}
+
+// Ouvrir/fermer le bot
+botFloat.onclick = () => {
+  botBox.style.display = botBox.style.display === 'flex' ? 'none' : 'flex';
+};
+
+// Envoyer message utilisateur et réponse intelligente
+sendBtn.onclick = async () => {
+  const text = inputText.value.trim().toLowerCase();
+  if (!text) return;
+
+  appendMsg('user', text);
+  inputText.value = '';
+
+  // Chercher correspondance dans instructions
+  const match = instructions.find(i => i.instruction.toLowerCase().includes(text));
+  if (match) {
+    appendMsg('bot', match.instruction);
+  } else {
+    appendMsg('bot', "Je n'ai pas trouvé de réponse. Peux-tu reformuler ?");
+  }
+};
+
+// Liste des autorisations
+toggleAuthBtn.onclick = async () => {
+  authListDiv.style.display = authListDiv.style.display === 'block' ? 'none' : 'block';
+  authListDiv.innerHTML = '';
+
+  const { data, error } = await supabase.from('users').select('id,user_authorization');
+  if (error) {
+    appendMsg('bot', 'Erreur lors du chargement des utilisateurs.');
+    return;
+  }
+
+  data.forEach(u => {
+    const div = document.createElement('div');
+    div.className = 'auth-item';
+    div.textContent = `${u.user_authorization} - ID: ${u.id}`;
+    div.onclick = () => appendMsg('bot', 'Autorisation sélectionnée: ' + u.user_authorization);
+    authListDiv.appendChild(div);
+  });
+};
+
+// Login admin
+adminBtn.onclick = () => {
+  if (adminInput.value === '233233') {
+    adminPanel.style.display = 'block';
+    botBox.style.display = 'none';
+    loadInstructions();
+  } else {
+    alert('Code incorrect');
+  }
+};
+
+// Fermer le panel admin
+closeAdminBtn.onclick = () => {
+  adminPanel.style.display = 'none';
+  botBox.style.display = 'flex';
+};
+
+// Charger initialement les instructions
+loadInstructions();
+</script>
 </body>
 </html>
