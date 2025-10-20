@@ -306,6 +306,34 @@ closeAdminBtn.onclick = () => {
 
 // Charger initialement les instructions
 loadInstructions();
+
+<script>
+  // Afficher l'entête uniquement si on est sur l'accueil
+  const isHome = window.location.pathname.includes('index.html') || window.location.pathname === '/' 
+  if(isHome){
+    document.body.insertAdjacentHTML('afterbegin', `
+      <div class="handwritten-header">
+        📚 assistant commercial Lesfacilitateurs Middleman What's 651475255💰
+      </div>
+    `)
+  }
+
+  /* Style de l'entête manuscrite */
+  @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+  .handwritten-header {
+    position: sticky;
+    top: 0;
+    background-color: #001f3f; /* bleu nuit */
+    color: white;
+    font-family: 'Indie Flower', cursive;
+    font-size: 20px;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+</style>
 </script>
 </body>
 </html>
