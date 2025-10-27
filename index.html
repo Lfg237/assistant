@@ -1,323 +1,359 @@
+<i><marquee><span style="color:red">  Maximum de partage svp ça peut aider quelqu'un 😘✔️🤝  🇨🇲
+   !</span></span></marquee></i></h1>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>assistant commercial LesFacilitateurs </title>
-<link rel="icon" href="https://i.ibb.co/4JH0qZt/african-head.png" type="image/png">
-<style>
-:root{
-  --bg:#0b1220; --accent:#2563eb; --card:rgba(255,255,255,0.03); --text:#e6eef8;
-}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOS Docteur</title>
+  <style>
+    /* Styles généraux */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #2e7d32; /* Fond d'écran vert */
+      color: #333;
+    }
+    
+    /* Entête */
+    header {
+      background-color: #00796b;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    /* Menu hamburger */
+    .menu-toggle {
+      cursor: pointer;
+      display: inline-block;
+    }
+    .menu-toggle div {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 5px 0;
+      transition: 0.4s;
+    }
+    
+    /* Menu déroulant */
+    #menu {
+      display: none;
+      background-color: #004d40;
+      padding: 10px;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      z-index: 999;
+    }
+    #menu.show {
+      display: block;
+    }
+    #menu a {
+      display: block;
+      padding: 10px;
+      color: white;
+      text-decoration: none;
+    }
+    #menu a:hover {
+      background-color: #00796b;
+    }
+    
+    /* Pied de page */
+    footer {
+      background-color: #00796b;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+    
+    /* Section des symptômes */
+    .symptoms-section {
+      margin-top: 200px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    /* Écran d'affichage des symptômes */
+    #display-screen {
+      margin: 20px auto;
+      padding: 50px;
+      width: 80%;
+      max-width: 600px;
+      min-height: 100px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      text-align: left;
+      font-size: 16px;
+      display: none;
+    }
 
-/* BOT FLOAT */
-#botFloat{
-  position:fixed; left:20px; bottom:20px; width:72px; height:72px; border-radius:50%;
-  background:var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:1100;
-}
-#botFloat img{width:60%;height:60%;border-radius:50%;}
+    /* Bouton et résultat */
+    #treatment-button {
+      display: block;
+      width: 100%;
+      max-width: 200px;
+      margin: 20px auto;
+      padding: 15px;
+      background-color: #004d40;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+    }
 
-/* BOT BOX */
-#botBox{
-  position:fixed; left:50%; bottom:110px; transform:translateX(-50%);
-  width:350px; max-height:80vh; background:var(--card); border-radius:12px;
-  display:flex; flex-direction:column; overflow:hidden; z-index:1100; backdrop-filter:blur(6px); display:none;
-}
-#botHead{padding:10px;background:var(--accent);color:white;display:flex;align-items:center;gap:8px;}
-#botHead .title{flex:1;font-weight:700;}
-#botBody{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
-.msg{max-width:86%;padding:8px 10px;border-radius:10px;line-height:1.35;font-size:14px;}
-.msg.bot{background:rgba(255,255,255,0.04);align-self:flex-start;color:var(--text);}
-.msg.user{background:rgba(255,255,255,0.06);align-self:flex-end;color:#041025;}
-#botFooter{display:flex;padding:8px;border-top:1px solid rgba(255,255,255,0.05);gap:6px;}
-#botFooter input{flex:1;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:white;outline:none;}
-#botFooter button{padding:6px 10px;border:none;border-radius:8px;background:var(--accent);color:white;cursor:pointer}
-
-/* LISTE DES AUTORISATIONS */
-#authList{
-  display:none; position:fixed; top:70px; left:50%; transform:translateX(-50%);
-  width:360px; max-height:240px; overflow:auto; background:#172544; padding:8px; border-radius:8px; z-index:1090;
-}
-.auth-item{padding:8px;border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,0.02);cursor:pointer}
-.auth-item:hover{background:rgba(255,255,255,0.04)}
-
-/* ADMIN PANEL */
-#adminPanel {
-  position: fixed;
-  top: 20px;           /* distance depuis le haut */
-  right: 20px;         /* distance depuis la droite */
-  width: 400px;        /* largeur du panel */
-  max-height: 80vh;    /* hauteur max */
-  overflow: auto;
-  background: rgba(0,0,0,0.85);
-  border-radius: 12px;
-  padding: 16px;
-  z-index: 1200;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  transform: none;     /* on supprime le translate pour ne pas le centrer */
-
-}
-#adminPanel h2, #adminPanel h3{color:white; margin:8px 0;}
-#adminPanel .table{width:100%; border-collapse:collapse; margin-top:10px;}
-#adminPanel .table th{background:var(--accent); color:white; padding:8px; text-align:left;}
-#adminPanel .table td{padding:6px; border-bottom:1px solid rgba(255,255,255,0.04);}
-#adminPanel .action-btn{background:transparent; border:1px solid rgba(255,255,255,0.06); color:white; padding:4px 6px; border-radius:6px; cursor:pointer;}
-
-/* Responsive */
-@media (max-width:420px){
-  #botBox{width:calc(100% - 20px); left:10px; transform:none;}
-  #authList{width:calc(100% - 20px);}
-  #adminPanel{width:95%;}
-}
-</style>
+    #treatment-result {
+      display: none;
+      margin-top: 20px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
 </head>
 <body>
-
-<!-- BOT FLOAT -->
-<div id="botFloat" title="Ouvrir le bot">
-  <img src="https://i.ibb.co/4JH0qZt/african-head.png" alt="bot">
-</div>
-
-<!-- BOT BOX -->
-<div id="botBox">
-  <div id="botHead">
-    <div class="title">🤵🏿   LesFacilitateurs</div>
-    <div id="userIdDisplay">ID: <span id="userId">12345</span></div>
-    <button id="toggleAuthBtn" style="background:#1b2b4a;color:white;border:none;padding:6px;border-radius:6px;cursor:pointer">Autorisations</button>
-    <div style="margin-left:8px;">
-      <input id="adminInput" type="password" placeholder="Code admin" style="background:rgba(255,255,255,0.06);border:none;color:white;padding:6px;border-radius:6px;outline:none">
-      <button id="adminBtn" style="background:rgba(255,255,255,0.06);border:none;padding:6px;border-radius:6px;color:white;cursor:pointer">➡</button>
+  <!-- Entête avec menu hamburger -->
+  <header>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
-  </div>
-  <div id="botBody" aria-live="polite">
-    <div class="msg bot"> 👋 🕯️ création site web   application mobile 💥 marketing digital 💡offre et recherche emplois si tu veux que je parle de toi contact mon boss  le numéro en haut 👆👆 et si tu as besoin d'autres choses écrit 👇👇.</div>
-  </div>
-  <div id="botFooter">
-    <input id="inputText" placeholder="Écris ton message..." autocomplete="off">
-    <button id="sendBtn">📨</button>
-  </div>
-</div>
+    <h1>  médecine sous l'arbre</h1>
+  </header>
+  
+  <!-- Menu déroulant -->
+  <nav id="menu">
+    <a href="https://www.lesfacilitateurs.site" onclick="closeMenu()">e-commerce</a>
+    <a href="https://chat.whatsapp.com/LUWj09zs1SS5l1WyjhJxbb" onclick="closeMenu()">communauté whatsapp</a>
+    <a href="https://t.me/lesfacilitateursgroupe" onclick="closeMenu()">telegram</a>
+     <a href="https://www.facebook.com/profile.php?id=61561630815710" onclick="closeMenu()">abonne toi à la page</a>
+  <a href="https://wa.me/c/%20besoin%20de%20de%20partennariat%20commercial%20" onclick="closeMenu()">partennariat commercial</a>
+ 
+  </nav>
+  
+  <!-- Section des symptômes -->
+  <div class="symptoms-section">
+    <h2>Sélectionnez une maladie</h2>
+    <select id="symptoms-select" onchange="afficherSymptomes(this.value)" size="1000000000000000">
+        <option value="">dents blanches</option>
+        <option value="">dents blanches</option>
+        <option value="">dents blanches</option>
+        <option value="">dents blanches</option>
+        <option value="">dents blanches</option>
+        <option value="POUR CHASSER UN REPTILE DANGEREUX QUI ENTRE ET SE CACHE DANS VOS LOCAUX , MAISON , TOILETTE , BOUTIQUE , MAGASIN ❗
 
-<!-- LISTE DES AUTORISATIONS -->
-<div id="authList"></div>
+✨
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <h2>🔒 Tableau administrateur</h2>
-    <button id="closeAdminBtn" style="background:var(--accent); color:white; padding:6px; border-radius:6px; border:none; cursor:pointer">Fermer</button>
-  </div>
-  <h3>Instructions 
-    <button id="addInstrBtn" style="margin-left:8px; padding:6px; border-radius:6px; border:none; cursor:pointer">+</button>
-  </h3>
-  <table class="table" id="instrTable">
-    <thead><tr><th>ID</th><th>Instruction</th><th>Actions</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
-<!-- Entête manuscrite fixe -->
-<div class="handwritten-header">
-  📚assistant commercial Lesfacilitateurs Middleman What's 651475255💰
-</div>
+Un serpent , lézard, ou Varan ou gecko rentre dans votre maison ou magasin ou Studio et se cache , vous êtes paniquer et vous ne savez pas comment le chasser ou la débusquer 😤
 
-<style>
-/* Police manuscrite via Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+            #INGRÉDIENTS 
 
-.handwritten-header {
-  position: sticky; /* reste en haut quand tu scroll */
-  top: 0;
-  background-color: rgba(37,99,235,0.9); /* bleu accent */
-  color: white;
-  font-family: 'Indie Flower', cursive; /* écriture à la main */
-  font-size: 24px;
-  padding: 12px 16px;
-  text-align: center;
-  border-bottom: 2px solid rgba(255,255,255,0.3);
-  z-index: 1000; /* au-dessus des autres éléments */
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-const supabaseUrl = 'https://ycotvgvevyfyqflicmtw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljb3R2Z3ZldnlmeXFmbGljbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMTQxMzIsImV4cCI6MjA3NTY5MDEzMn0.Yyod-LWZVv5t5PggZ1EZm83vgkvHgaJd2QFJe4_vMDQ';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+- Papier entier mouillé de miel
+- Briquet ou allumettes
+- Miel 
+                 
 
-const botFloat = document.getElementById('botFloat');
-const botBox = document.getElementById('botBox');
-const botBody = document.getElementById('botBody');
-const inputText = document.getElementById('inputText');
-const sendBtn = document.getElementById('sendBtn');
-const toggleAuthBtn = document.getElementById('toggleAuthBtn');
-const authListDiv = document.getElementById('authList');
-const adminInput = document.getElementById('adminInput');
-const adminBtn = document.getElementById('adminBtn');
-const adminPanel = document.getElementById('adminPanel');
-const closeAdminBtn = document.getElementById('closeAdminBtn');
-const addInstrBtn = document.getElementById('addInstrBtn');
-const instrTableBody = document.getElementById('instrTable').querySelector('tbody');
+              #PROCÉDURE
 
-let instructions = [];
+Passez le miel sur tout le papier et sécher bien au soleil puis Allumer  et le placer au milieu du salon ou magasin Ouvrez la porte 🫡
 
-// Afficher message dans le bot
-function appendMsg(sender, text) {
-  const div = document.createElement('div');
-  div.className = 'msg ' + sender;
-  div.innerHTML = text;
-  botBody.appendChild(div);
-  botBody.scrollTop = botBody.scrollHeight;
-}
+ partout où le serpent ou le reptile se cache, il se précipitera à toute vitesse hors du lieu ou il se trouve.
 
-// Charger instructions depuis Supabase
-async function loadInstructions() {
-  const { data, error } = await supabase.from('bot_instructions').select('*');
-  if (!error && data) {
-    instructions = data;
-    renderInstrTable();
-  }
-}
+NB : 
+- Si vous avez des toilettes à fosse, brûlez du papier imbibé (Papier mouillé de miel) de miel et jetez-le dans les toilettes.
 
-// Afficher tableau des instructions
-function renderInstrTable() {
-  instrTableBody.innerHTML = '';
-  instructions.forEach(i => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${i.id}</td>
-      <td>${i.instruction}</td>
-      <td>
-        <button class="action-btn edit-btn" data-id="${i.id}">Modifier</button>
-        <button class="action-btn delete-btn" data-id="${i.id}">Supprimer</button>
-      </td>
-    `;
-    instrTableBody.appendChild(row);
-  });
+- Mais vous devez d'abord sécher le papier mouillé de miel j'usqu'à ce qu'il puisse prendre feu.
 
-  // Ajouter les événements après création
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.dataset.id;
-      const instr = instructions.find(ins => ins.id == id);
-      const newText = prompt('Modifier instruction:', instr.instruction);
-      if (newText) {
-        await supabase.from('bot_instructions').update({ instruction: newText }).eq('id', id);
-        loadInstructions();
-      }
-    }
-  });
+Si vous avez un sepent à chasser alors séchez le papier imbibé de miel au moins une ou deux heures avant. Ou bien pour être prévoyant, il vaudrait avoir des papiers imbibés de miel séchés et rangés en lieu sûr.
 
-  document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.dataset.id;
-      if (!confirm('Supprimer cette instruction ?')) return;
-      await supabase.from('bot_instructions').delete().eq('id', id);
-      loadInstructions();
-    }
-  });
-}
+L'odeur du miel brûlé est un cauchemar répulsif pour tous les dangereux reptiles.☺️
 
-// Modifier une instruction
-window.editInstr = async function(id) {
-  const instr = instructions.find(i => i.id === id);
-  if (!instr) return;
-  const t = prompt('Modifier instruction:', instr.instruction);
-  if (t) {
-    await supabase.from('bot_instructions').update({ instruction: t }).eq('id', id);
-    loadInstructions();
-  }
-}
+Abonnez-vous pour voir plus d'astuces.
 
-// Supprimer une instruction
-window.deleteInstr = async function(id) {
-  if (!confirm('Supprimer cette instruction ?')) return;
-  await supabase.from('bot_instructions').delete().eq('id', id);
-  loadInstructions();
-}
+NB: Pour tous vos besoins de retour d'affection rapide en 72h, infertilité féminine ou masculine, traitement de vos différentes maladies et tout autre problème spirituel contacter nous pour votre satisfaction.
+">poison repulsif</option>
+        <option value="L’ huile de ricin est souvent sous-estimée, et ses bienfaits sur la peau et les cheveux et ses utilisations sont même ignorés, notamment pour sa consistance épaisse et collante. Cependant, l’huile de ricin est un remède efficace et peu coûteux pour résoudre de nombreux problèmes liés à la peau et aux cheveux. Ci-dessous, nous expliquons pourquoi il est utile pour nos cheveux .
 
-// Ajouter une instruction
-addInstrBtn.onclick = async function() {
-  const t = prompt('Nouvelle instruction:');
-  if (t) {
-    await supabase.from('bot_instructions').insert([{ instruction: t }]);
-    loadInstructions();
-  }
-}
+Riche en acide ricinoléique, un agent naturel aux propriétés antibactériennes et antifongiques, l’huile de ricin est très efficace pour éliminer tout type de champignon ou de bactérie pouvant inhiber la pousse des cheveux. De plus, étant riche en acides gras oméga 9, il nourrit à la fois les cheveux et le follicule. L’huile de ricin est très pénétrante et nourrit en profondeur les pores et les follicules qui produisent les cheveux.
 
-// Ouvrir/fermer le bot
-botFloat.onclick = () => {
-  botBox.style.display = botBox.style.display === 'flex' ? 'none' : 'flex';
-};
+Étant une huile brillante, elle est très utile pour donner brillance et éclat aux cheveux. Ajoutez de l’huile de ricin de préférence sur les pointes des cheveux, et non sur le cuir chevelu, pour leur donner un aspect doux et naturel. Appliquez-le en versant deux ou trois gouttes sur vos mains, et en le frottant dans les cheveux et vers les pointes.
 
-// Envoyer message utilisateur et réponse intelligente
-sendBtn.onclick = async () => {
-  const text = inputText.value.trim().toLowerCase();
-  if (!text) return;
+L’huile de ricin est très utile pour favoriser la repousse des cheveux , et ci-dessous nous expliquons comment l’appliquer. Appliquez de l’huile de ricin sur les racines et le cuir chevelu, en utilisant uniquement vos mains. Assurez-vous de bien répartir l’huile de ricin sur le cuir chevelu.
 
-  appendMsg('user', text);
-  inputText.value = '';
+Couvrez votre tête et vos cheveux avec un bonnet en plastique, puis enveloppez-les avec une serviette. Laissez agir au moins 15 minutes, puis lavez vos cheveux normalement, en utilisant un shampooing neutre.
 
-  // Chercher correspondance dans instructions
-  const match = instructions.find(i => i.instruction.toLowerCase().includes(text));
-  if (match) {
-    appendMsg('bot', match.instruction);
-  } else {
-    appendMsg('bot', "Je n'ai pas trouvé de réponse. Peux-tu reformuler ?");
-  }
-};
+Appliquez ce traitement de repousse des cheveux pendant 6 à 8 semaines pour des résultats satisfaisants. Évitez l’abus de produits chimiques, car ils peuvent endommager le cuir chevelu et les follicules.
 
-// Liste des autorisations
-toggleAuthBtn.onclick = async () => {
-  authListDiv.style.display = authListDiv.style.display === 'block' ? 'none' : 'block';
-  authListDiv.innerHTML = '';
+">repousse des cheveux</option>
+        <option value="11. Abaisse le Cholestérol
+La fibre et les graisses saines contenues dans la graine d’avocat aident à réduire le mauvais cholestérol (LDL) et à augmenter le bon cholestérol (HDL), bénéfique pour le cœur.
+Astuce : Ajoutez la poudre de graines à vos recettes, comme des smoothies ou des soupes.
 
-  const { data, error } = await supabase.from('users').select('id,user_authorization');
-  if (error) {
-    appendMsg('bot', 'Erreur lors du chargement des utilisateurs.');
-    return;
-  }
+12. Soutient la Santé des Os
+Riche en calcium, magnésium et phosphore, la graine d’avocat aide à renforcer les os et prévient des maladies comme l’ostéoporose.
+Astuce : Ajoutez la poudre dans des barres énergétiques, granola ou yaourt.
 
-  data.forEach(u => {
-    const div = document.createElement('div');
-    div.className = 'auth-item';
-    div.textContent = `${u.user_authorization} - ID: ${u.id}`;
-    div.onclick = () => appendMsg('bot', 'Autorisation sélectionnée: ' + u.user_authorization);
-    authListDiv.appendChild(div);
-  });
-};
+Préparation et Utilisation des Noyaux d’Avocat
+Sécher les Noyaux : Rincez et séchez-les sur un rebord de fenêtre pendant quelques jours jusqu’à durcissement.
+Retirer la Peau Extérieure : Une fois secs, retirez la peau brune pour découvrir la graine intérieure.
+Moudre en Poudre : Coupez en petits morceaux et mixez jusqu’à obtenir une poudre fine. Conservez dans un récipient hermétique.
+Utilisation : Ajoutez la poudre aux smoothies, jus, soupes, salades, yaourts ou pâtisseries. Commencez par une petite quantité et augmentez progressivement.
+Conclusion
+Les noyaux d’avocat sont de véritables trésors nutritionnels, riches en bienfaits pour la santé. De la digestion au système immunitaire, ils soutiennent divers aspects de votre bien-être. En les intégrant à votre alimentation sous forme de poudre, vous pourrez tirer parti de leurs propriétés uniques au quotidien et ne plus jamais jeter cette précieuse partie de l’avocat.">le noyau d'avocat</option>
+        <option value="👹👺Le Kong, une société secrète de mangeurs d’hommes👹👹
 
-// Login admin
-adminBtn.onclick = () => {
-  if (adminInput.value === '233233') {
-    adminPanel.style.display = 'block';
-    botBox.style.display = 'none';
-    loadInstructions();
-  } else {
-    alert('Code incorrect');
-  }
-};
+Le Kong consiste à faire mourir une ou plusieurs pour en faire des esprits errants ou des esclaves dans un autre monde.
 
-// Fermer le panel admin
-closeAdminBtn.onclick = () => {
-  adminPanel.style.display = 'none';
-  botBox.style.display = 'flex';
-};
+Le Kong, c’est le nom donné à une pratique maléfique à laquelle se livre certaines personnes qui appartiennent aux sociétés secrètes qu’on rencontre dans les régions du Centre, Sud et de l’Est du Cameroun. La pratique est très ancienne et se transmet comme un héritage à chaque génération. Elle a aussi quelques similitudes avec le Famla chez les Bamilékés. Si elle fait peur, c’est parce que les adeptes de cette pratique sont le plus souvent des personnes proches ou non de la famille, qui se livrent à des sacrifices pour honorer un engagement envers les autres membres.
 
-// Charger initialement les instructions
-loadInstructions();
+Selon certains témoignages, le Kong consiste à faire mourir une ou plusieurs pour en faire des esclaves dans un autre monde ou des esprits errants. Les personnes qui pratiquent le Kong ne le font pas d’office pour être riche, ils le font juste pour augmenter leur puissance occulte. Dans leur association la règle est claire, lorsqu’une personne participe dans ce qu’ils s’appellent couramment « manger une personne », toutes les personnes présentes devront à leur tour offrir un membre de sa famille comme festin. Parfois l’acte posé est juste par pure méchanceté. Plus il y a des morts, plus les différents membres gagnent en puissance.
 
-<script>
-  // Afficher l'entête uniquement si on est sur l'accueil
-  const isHome = window.location.pathname.includes('index.html') || window.location.pathname === '/' 
-  if(isHome){
-    document.body.insertAdjacentHTML('afterbegin', `
-      <div class="handwritten-header">
-        📚 assistant commercial Lesfacilitateurs Middleman What's 651475255💰
-      </div>
-    `)
-  };
-</style>
-</script>
-</body>
-</html>
+Les personnes qui sont prises dans le Kong, ne le sont pas de manière hasardeuse. Avant de choisir une victime, les membres des sociétés maléfiques font d’abord une sorte de repérage. Ils choisissent des personnes qui ont un potentiel métaphysique important, des gens qui ont un certain pouvoir qui parfois ne sont même pas au courant. Lorsque les futures victimes sont ciblées, leurs noms apparaissent sur une liste écrite à partir d’une dent appartenant à l’un des membres de l’association décédée.
+
+Pour atteindre leur cible, les membres de la société secrète procèdent par empoisonnement. Ils donnent à leur victime un poison mystique qui peut se retrouver dans leur repas ou pendant le sommeil. Celle-ci peut mourir directement en ce moment et c’est l’âme qui sera esclave dans un autre monde, soit elle peut juste s’endormir, ce qui sera aux yeux de la famille considéré de mort, alors qu’il n’en est rien. Aussitôt que l’enterrement aura lieu, elle va être réveillée par les membres de la société secrète.
+
+Dans certaines familles, lorsqu’on s’interroge sur la mort d’une personne arrivée de manière subite, sans explication, un doigt accusateur est tourné en direction des personnes qui pratiquent le Kong. En guise de représailles, le corps est enterré avec un chat sur lequel on a effectué une série d’incantations. La mesure vise à mettre à mort toutes les personnes qui ont participé à la mort du défunt. Dans certaines situations, on attend neuf jours avant d’enterrer ou encore on verse l’acide sur le corps pour qu’il ne soit plus utilisé par les membres du Kong.
+
+Source: Le Kong
+Source: Afrikmag.com">kong</option>
+        <option value="Comment se débarrasser d'une infections chronique et rebelle ? Le principe est simple :
+Cherche cette plante merveilleuse dont le côté est rouge, assaye de triturer tu obtiens son liquide ensuite tu te purge avec chaque matin..
+NB: tu te purge tu fais l'effort que ceci dure bien dans ton ventre avant d'aller aux toilettes..
+2eme étape : va dans un marché tu te procure du gingembre et du ginseng ici en imo👇🏾, tu n'épluche rien tu larve juste proprement les 02 ( gingembre et ginseng) ensuite tu découpe finement le tout et tu mélange tu mixe au robot- mixeur, pour ceux qui n'ont pas de robot-mixeur , vous pilez tout simplement, et après avoir écraser ou pilez, téléverser dans une marmite y ajouter 2 l d'eau en fonction de la quantité des éléments que vous avez acheté, puis laissez bouillir pendant 10 min et déposez, en fin boire 1 verre matin et soir jusqu'à la guérison totale..
+NB: se purger en buvant l'autre en même temps..
+Indications d'infections
+Chlamydia,
+Gonococcie,
+Blennorragie,
+Staphylocoque,
+Trompe bouchée
+Troubles de cycle
+Règles douloureuse
+Etc....
+Bonne guérison"> chaude pisse</option>
+        <option value="((RECETTE DE JUS POUR RENDRE L'HOMME VIRILE. ATTENTION, LUI LÀ IL EST PUISSANT HEINN, IL RENDS LES SPERMATOZOÏDES TRÈS VIOLENTS, RAPIDES ET TRÈS ADROITS ))
+
+SON UN COUP PEU DONNER GROSSESSE DONC ATTENTION
+
+- GINGEMBRE AFRICAIN
+-PETIT COLA
+
+Mixez bien les deux ingrédients .Ajoutez un peu d'eau, filtrez et buvez un petit verre tous les jours où avant le match
+
+Peu se conserver durant 3 semaines au frais.
+
+NB: Jus uniquement pour les hommes.
+Si tu veux être virile sans engrosser madame rajoute une cuillère d'huile de nems.">virilité</option>
+        <option value="COMMENT TRAITER LES PALPITATIONS DU CŒUR ❤️
+
+La palpation est le signe révélateur d'un changement du rythme cardiaque tels que : tachycardie, exstracystol ventriculaire sporadique.
+
+Les palpitations ont des causes diverses. Elle peut être dû à des facteurs cardiaques, troubles de rythme cardiaque, hypertension artérielle ou être liée à d'autres maladies tels que : l'anémie et les troubles du sommeil, l'hyperthyroïdiie .
+
+Les palpitations cardiaques peuvent être également résulter d'une adaptation du coeur à une situation situation particulière : le stress, anxiété. Elles sont habituellement begnine.
+
+Toutes les palpitations ne sont pas le signal d'une atteinte du rythme cardiaque.  Elle peut être liée à un stress accru, a une ingestion alimentation trop importante.
+
+▪️ INGRÉDIENTS NÉCESSAIRES
+
+👉10 gousses d'ail
+👉1/2 litre d'huile d'olive
+👉1/4 litre du jus de citron
+
+▪️ PRÉPARATION
+
+👉Hacher l'ail et mettre dans un flacon
+👉Ajoutez l'huile et le jus de citron
+👉Laisser reposer pendant 48heures.
+
+▪️MODE D'EMPLOI
+
+👉Boire 2 cuillères à soupe le matin a jeun et le soir au coucher
+👉Faites ce traitement sur trois semaines et serez guérir par la grâce de Dieu.
+
+">palpitation du coeur</option>
+        <option value="💊 Un antibiotique est une substance naturelle ou synthétique qui détruit ou bloque la croissance des bactéries.
+
+🔔 Un usage répété ou inadapté des antibiotiques augmentent la résistance des bactéries pathogènes aux médicaments, ce qui rend les traitements de certaines infections plus difficiles à soigner. C'est ce qu'on appelle l'antibiorésistance.  
+
+🚨 En s'auto médicamentant et en ne respectant pas le dosage ou le délai de traitement prescrit par le médecin, on risque de favoriser l'apparition de la résistance bactérienne. À terme, on risque d'avoir de moins en moins d'antibiotiques à disposition des professionnels de santé pour combattre les maladies bactériennes !
+
+⚠ Quand j'ai fini mon traitement, je ramène les antibiotiques restants à mon pharmacien et je ne les utilise pas à une autre occasion.">antibiotique</option>
+        <option value="TRAITEMENT NATUREL DES MALADIES RESPIRATOIRES, EMPHYSÈME, PHLEGME.
+
+Les maladies respiratoires touchent les voies aériennes, y compris les voies nasales, les bronches et les poumons. Elles vont d'infections aiguës comme la pneumonie et la bronchite à des affections chroniques telles que l'asthme et la bronchopneumopathie chronique obstructive.
+Enfin, les complications peuvent être graves voire compromettre le pronostic vital, notamment chez les personnes fragiles : épanchement pleural, abcès du poumon, détresse respiratoire  qui nécessite une ventilation assistée, choc septique, voire embolie pulmonaire, notamment chez des personnes ayant des antécédents thromboemboliques ou des troubles de la coagulation.
+Voici un traitement pour résoudre ce problème :
+
+Ingrédients :
+🍀 Feuilles de Cassia occidentalis 
+🍀 Feuilles de Baphia nitida, 
+🍀 Feuilles de Parasolier
+
+Préparation :
+piler les feuilles de ces ingredients, délayer dans de l'eau chaude, filtrer et boire.
+Prendre un verre tiède matin et soir jusqu'à satisfaction.
+@FOLLOWERS.
+LA SANTÉ EST LA VRAIE RICHESSE!!!">maladies respiratoires</option>
+        
+          <option value="LES VERTUS MÉDICINALES DU FRUITS DE 4 CÔTÉS. 
+
+Très utilisé en médecine traditionnelle. Il est reconnu pour ses nombreux bienfaits dans le traitement de l’infertilité.
+
+Le Tetrapleura (4 côtés) agit en empêchant l’action de la progestérone sur l’endomètre (muqueuse de l’utérus) et en conservant les taux d’œstrogène dans les limites normales.
+
+Etant donné qu’un taux élevé d’œstrogènes favorise l’apparition et la formation de fibromes, kystes ou polypes utérins l’action de la  plante entraînera rapidement un rétrécissement rapide de ces tumeurs et réduira vos douleurs.
+
+Il est aussi reconnu pour ses nombreux bienfaits dans le traitement de certaines maladies comme l’asthme, le diabète, l’hypertension, le mal de dos.
+
+▪️SES BIENFAITS POUR LA SANTÉ
+
+👉Soigne les kystes, myomes, fibromes
+👉Lutte contre trompes bouchées
+👉Lutte contre les inflammations du col utérin
+👉Lutte contre les règles douloureuses et abondantes
+👉Lutte contre les dysménorrhées
+👉Lutte contre le col et vagin lâchés et béant suite à un accouchement
+👉Traite la stérilité
+👉Traite les démangeaisons vaginales
+👉Permet d’avoir une bonne odeur vaginale grâce au parfum qu’il dégage
+👉Favorise la fertilité
+
+Il est aussi utilisé comme épices dans la sauce et dans d’autres préparations.
+
+▪️COMMENT PRÉPARER ? 
+
+Dans une marmite remplie d’eau, ajoutez le 4 côtés, laissez bouillir entièrement. Buvez-en , il nettoie de l’intérieur et favorise la fertilité.
+
+▪️POUR AVOIR UNE BELLE PEAU APRÈS L'ACCOUCHEMENT
+
+Pour une belle peau Après l’accouchement, pour prendre soin de la mère et de l’enfant. Mettez-en dans du beurre de karité après l’avoir écrasé. Laissez bouillir quelques minutes. Lorsqu’il est froid renversez votre préparation dans un pot et fermez. Utilisez la préparation après le bain comme crème de jour et nuit pour la mère et bébé. Il nettoie le teint et protège des nombreux problèmes de peau. 
+
+▪️TRAITER KYSTES, FIBROMES ET MYOMES
+Pour les kystes, myomes, fibromes et certaines infertilités, règles douloureuses : Prendre les parties charnues de ce fruit et les mettre dans un récipient d’eau, après les avoir trempées quelques minutes, boire un demi verre d’eau de cette décoction.
+
+">4 côtés</option>
+            <option value="ODEURS CORPORELLES ET TRAITEMENT NATUREL EFFICACE
+
+Les odeurs corporelles sont considérées comme incommodantes, et on fait tout pour s'en débarrasser : hygiène, déodorants, et même traitements médicaux.
+Mais la cause principale à l'odeur corporelle forte est la présence de bactéries. Ces bactéries vivent à la surface de la peau. Elles sont plus nombreuses au niveau des plis et des zones riches en poils comme les aisselles ou les organes génitaux. Elles se nourrissent des peaux mortes et des molécules sécrétées par la peau sébum, sueur et différentes molécules chimiques. En digérant, elles produisent des gaz responsables d'odeurs plus ou moins fortes selon les personnes. Il arrive aussi que des maladies génétiques soient responsables d'odeurs corporelles anormalement fortes.
+BIO CURE vous propose une solution efficace pour tous ceux qui en souffrent.
+
+Préparation : 
+→Cherchez à part égale 
